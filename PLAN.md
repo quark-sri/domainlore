@@ -1,6 +1,6 @@
 # domainlore: plan
 
-> Status: v0.1 in progress, 2026-10-30. Where this plan and [ADR 0002](docs/adr/0002-okf-with-domainlore-extension.md) differ, the ADR wins.
+> Status: v0.1.0 released, 2026-10-30; v0.2a next. Where this plan and [ADR 0002](docs/adr/0002-okf-with-domainlore-extension.md) differ, the ADR wins.
 > Produced from a design interview; every decision below was accepted by the owner. Vocabulary is defined in [GLOSSARY.md](GLOSSARY.md). Architecture decisions live in [docs/adr/](docs/adr/).
 
 ## 1. Purpose
@@ -330,8 +330,8 @@ The `query` / `path` / `explain` commands mirror graphify's interface because ag
 6. ✅ **`build` and `check`**: indexes, maps, glossary, Mermaid blocks, `.lore/graph.json`, golden test.
 7. ✅ **`query` / `path` / `explain`** (keyword + type hints; retrieval eval hit@5 93%).
 8. ✅ **`init`** (lore.toml, AGENTS.md / CLAUDE.md block, Cursor rule) and the `lore-use` skill + Claude Code plugin.
-9. ⏳ Run the manual agent eval (`evals/README.md`), then **tag v0.1** with the owner's approval.
-10. Continue with v0.2a per section 13.
+9. ✅ **Manual agent eval** (`evals/README.md`: 30/30 correct) and **tag v0.1.0**.
+10. ⏳ Continue with v0.2a per section 13.
 
 ## 15. Prior art and how we use it
 

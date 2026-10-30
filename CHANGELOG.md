@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (v0.1)
+## v0.1.0 (2026-10-30)
 
 - OKF v0.2 Knowledge Base with seven domain types, typed relations, basis and trust tiers.
 - LinkML schema with generated JSON Schemas for frontmatter validation.
