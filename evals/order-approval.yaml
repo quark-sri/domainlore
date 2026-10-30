@@ -1,0 +1,35 @@
+# Domain questions about the demo product, and the page that answers each one.
+# evals/retrieval.py checks that `lore query` finds the expected page in its top results.
+# The same questions drive the manual agent eval in evals/README.md.
+knowledge: examples/order-approval
+questions:
+  - { q: "What is an order?", expect: ordering/entities/order }
+  - { q: "What does PO mean?", expect: ordering/entities/order }
+  - { q: "Which states can an order be in?", expect: ordering/entities/order }
+  - { q: "What is on an order line?", expect: ordering/entities/order-line }
+  - { q: "Who is the customer?", expect: ordering/entities/customer }
+  - { q: "Who places orders?", expect: ordering/actors/buyer }
+  - { q: "What is a requester?", expect: ordering/actors/buyer }
+  - { q: "What is the smallest order total allowed?", expect: ordering/rules/minimum-order-value }
+  - { q: "Why is my order total too low?", expect: ordering/rules/minimum-order-value }
+  - { q: "Which orders need approval?", expect: approvals/rules/approval-threshold }
+  - { q: "What is the approval threshold amount?", expect: approvals/rules/approval-threshold }
+  - { q: "Is the threshold 5000 or 10000 EUR?", expect: conflicts/approval-threshold-amount }
+  - { q: "Can a buyer approve their own order?", expect: approvals/rules/four-eyes }
+  - { q: "What is the four-eyes principle?", expect: approvals/rules/four-eyes }
+  - { q: "Who approves orders?", expect: approvals/actors/approver }
+  - { q: "What is an approval request?", expect: approvals/entities/approval-request }
+  - { q: "When is an approval request escalated?", expect: approvals/entities/approval-request }
+  - { q: "Where does the approver see pending requests?", expect: approvals/screens/approval-inbox }
+  - { q: "How does an approver approve an order?", expect: approvals/journeys/approve-order }
+  - { q: "How does a buyer place an order?", expect: ordering/journeys/place-order }
+  - { q: "Which screen lists all orders?", expect: ordering/screens/order-list }
+  - { q: "Which page creates a new order?", expect: ordering/screens/new-order }
+  - { q: "Where can I cancel an order?", expect: ordering/screens/order-details }
+  - { q: "Does cancelling an order ask for confirmation?", expect: conflicts/cancel-without-confirmation }
+  - { q: "Is there a known bug with cancel?", expect: conflicts/cancel-without-confirmation }
+  - { q: "When does an order ship?", expect: ordering/entities/order }
+  - { q: "What fields does the new order form have?", expect: ordering/screens/new-order }
+  - { q: "Which rules govern approval requests?", expect: [approvals/rules/four-eyes, approvals/rules/approval-threshold] }
+  - { q: "Can a submitted order be cancelled?", expect: ordering/entities/order }
+  - { q: "What columns does the order list show?", expect: ordering/screens/order-list }

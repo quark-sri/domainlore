@@ -1,0 +1,187 @@
+id: https://github.com/quark-sri/domainlore/schema
+name: domainlore
+title: domainlore Knowledge Base schema
+description: >-
+  Frontmatter schema for domainlore concept pages. A page is an OKF v0.2
+  concept; this schema adds the domainlore extension fields. Unknown keys
+  are allowed, as OKF requires.
+license: Apache-2.0
+version: 0.1.0
+prefixes:
+  linkml: https://w3id.org/linkml/
+  lore: https://github.com/quark-sri/domainlore/schema/
+  skos: http://www.w3.org/2004/02/skos/core#
+default_prefix: lore
+default_range: string
+imports:
+  - linkml:types
+
+enums:
+  Basis:
+    description: Whether a Fact states what the product should do or what it does.
+    permissible_values:
+      intended:
+        description: From tickets or docs.
+      actual:
+        description: From the running app or the code.
+  Status:
+    description: OKF lifecycle status.
+    permissible_values:
+      draft:
+      stable:
+      deprecated:
+
+slots:
+  type:
+    required: true
+    description: OKF concept type, such as Entity or Rule.
+  title:
+  description:
+  tags:
+    multivalued: true
+  status:
+    range: Status
+  stale_after:
+    description: ISO 8601 instant; the page is stale on or after it.
+  sources:
+    range: SourceRef
+    multivalued: true
+    inlined_as_list: true
+  generated:
+    range: Generated
+    inlined: true
+  verified:
+    range: Any
+    description: OKF verification events; a list of {by, at} or a single mapping.
+  basis:
+    range: Basis
+    description: Default basis for the page's Facts; items may override it.
+  aliases:
+    multivalued: true
+    slot_uri: skos:altLabel
+  relations:
+    range: Any
+    description: >-
+      Map from relation name to a list of targets. A target is a concept ID
+      or a mapping {to, basis, cites}. Checked by `lore check`.
+  states:
+    multivalued: true
+  transitions:
+    range: Transition
+    multivalued: true
+    inlined_as_list: true
+  steps:
+    range: Step
+    multivalued: true
+    inlined_as_list: true
+  diagram:
+    description: Journey diagram style.
+    pattern: "^(flowchart|sequence)$"
+  definition:
+    slot_uri: skos:definition
+  broader:
+    multivalued: true
+    slot_uri: skos:broader
+  about:
+    multivalued: true
+    description: Concept IDs that a Gap or Spec Conflict is about.
+  resolution:
+    description: How a person resolved the Conflict; empty while open.
+
+classes:
+  Any:
+    class_uri: linkml:Any
+
+  SourceRef:
+    description: An OKF sources entry.
+    attributes:
+      id:
+        identifier: false
+        description: Key used by footnotes and `cites`.
+      resource:
+        required: true
+      title:
+      author:
+      last_modified:
+      version:
+        description: Document or page version (domainlore extension).
+      basis:
+        range: Basis
+
+  Generated:
+    attributes:
+      by:
+        required: true
+      at:
+
+  Transition:
+    attributes:
+      from:
+        required: true
+      to:
+        required: true
+      trigger:
+      governed_by:
+        multivalued: true
+      basis:
+        range: Basis
+      cites:
+        multivalued: true
+
+  Step:
+    attributes:
+      id:
+        required: true
+      label:
+        required: true
+      screen:
+      actor:
+      goto:
+        range: Goto
+        multivalued: true
+        inlined_as_list: true
+
+  Goto:
+    attributes:
+      to:
+        required: true
+      when:
+
+  Concept:
+    abstract: true
+    description: Any OKF concept page.
+    slots:
+      - type
+      - title
+      - description
+      - tags
+      - status
+      - stale_after
+      - sources
+      - generated
+      - verified
+      - basis
+      - aliases
+      - relations
+
+  Entity:
+    is_a: Concept
+    slots: [states, transitions]
+  Rule:
+    is_a: Concept
+  Actor:
+    is_a: Concept
+  Journey:
+    is_a: Concept
+    slots: [steps, diagram]
+  Screen:
+    is_a: Concept
+  Term:
+    is_a: Concept
+    slots: [definition, broader]
+  Gap:
+    is_a: Concept
+    slots: [about, resolution]
+  SpecConflict:
+    is_a: Concept
+    slots: [about, resolution]
