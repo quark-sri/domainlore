@@ -1,0 +1,10 @@
+{
+  "name": "domainlore",
+  "version": "0.1.0",
+  "description": "Use a sourced domain Knowledge Base (knowledge/, OKF v0.2) when writing specs, tests and code. Needs the `lore` CLI.",
+  "author": { "name": "quark-sri" },
+  "homepage": "https://github.com/quark-sri/domainlore",
+  "repository": "https://github.com/quark-sri/domainlore",
+  "license": "Apache-2.0",
+  "keywords": ["domain-knowledge", "knowledge-base", "ontology", "okf", "glossary"]
+}

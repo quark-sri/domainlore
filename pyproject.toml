@@ -1,0 +1,48 @@
+[project]
+name = "domainlore"
+version = "0.1.0"
+description = "Sourced domain knowledge for AI coding agents, as layered markdown (OKF v0.2)."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [{ name = "quark-sri" }]
+keywords = ["knowledge-base", "ontology", "ai-agents", "okf", "domain-driven-design", "agents-md"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Documentation",
+    "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = [
+    "jsonschema>=4.23",
+    "pyyaml>=6.0.2",
+    "typer>=0.15",
+]
+
+[project.urls]
+Homepage = "https://github.com/quark-sri/domainlore"
+
+[project.scripts]
+lore = "domainlore.cli:app"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.9",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

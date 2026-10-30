@@ -1,0 +1,11 @@
+[knowledge]
+dir = "knowledge"
+
+[diagrams]
+max_nodes = 25
+
+[areas.ordering]
+description = "Buyers create, submit and track purchase orders"
+
+[areas.approvals]
+description = "Approvers accept or reject orders above the approval threshold"

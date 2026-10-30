@@ -1,0 +1,1454 @@
+{
+  "$defs": {
+    "Actor": {
+      "additionalProperties": true,
+      "description": "",
+      "properties": {
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "basis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Basis"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Default basis for the page's Facts; items may override it."
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generated": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Generated"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relations": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Map from relation name to a list of targets. A target is a concept ID or a mapping {to, basis, cites}. Checked by `lore check`."
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "stale_after": {
+          "description": "ISO 8601 instant; the page is stale on or after it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Status"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "description": "OKF concept type, such as Entity or Rule.",
+          "type": "string"
+        },
+        "verified": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "OKF verification events; a list of {by, at} or a single mapping."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Actor",
+      "type": "object"
+    },
+    "Any": {
+      "description": "Any value."
+    },
+    "Basis": {
+      "description": "Whether a Fact states what the product should do or what it does.",
+      "enum": [
+        "intended",
+        "actual"
+      ],
+      "title": "Basis",
+      "type": "string"
+    },
+    "Concept": {
+      "additionalProperties": true,
+      "description": "Any OKF concept page.",
+      "properties": {
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "basis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Basis"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Default basis for the page's Facts; items may override it."
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generated": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Generated"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relations": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Map from relation name to a list of targets. A target is a concept ID or a mapping {to, basis, cites}. Checked by `lore check`."
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "stale_after": {
+          "description": "ISO 8601 instant; the page is stale on or after it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Status"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "description": "OKF concept type, such as Entity or Rule.",
+          "type": "string"
+        },
+        "verified": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "OKF verification events; a list of {by, at} or a single mapping."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Concept",
+      "type": "object"
+    },
+    "Entity": {
+      "additionalProperties": true,
+      "description": "",
+      "properties": {
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "basis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Basis"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Default basis for the page's Facts; items may override it."
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generated": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Generated"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relations": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Map from relation name to a list of targets. A target is a concept ID or a mapping {to, basis, cites}. Checked by `lore check`."
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "stale_after": {
+          "description": "ISO 8601 instant; the page is stale on or after it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "states": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Status"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "transitions": {
+          "items": {
+            "$ref": "#/$defs/Transition"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "type": {
+          "description": "OKF concept type, such as Entity or Rule.",
+          "type": "string"
+        },
+        "verified": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "OKF verification events; a list of {by, at} or a single mapping."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Entity",
+      "type": "object"
+    },
+    "Gap": {
+      "additionalProperties": true,
+      "description": "",
+      "properties": {
+        "about": {
+          "description": "Concept IDs that a Gap or Spec Conflict is about.",
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "basis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Basis"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Default basis for the page's Facts; items may override it."
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generated": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Generated"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relations": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Map from relation name to a list of targets. A target is a concept ID or a mapping {to, basis, cites}. Checked by `lore check`."
+        },
+        "resolution": {
+          "description": "How a person resolved the Conflict; empty while open.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "stale_after": {
+          "description": "ISO 8601 instant; the page is stale on or after it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Status"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "description": "OKF concept type, such as Entity or Rule.",
+          "type": "string"
+        },
+        "verified": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "OKF verification events; a list of {by, at} or a single mapping."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Gap",
+      "type": "object"
+    },
+    "Generated": {
+      "additionalProperties": true,
+      "description": "",
+      "properties": {
+        "at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "by": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "by"
+      ],
+      "title": "Generated",
+      "type": "object"
+    },
+    "Goto": {
+      "additionalProperties": true,
+      "description": "",
+      "properties": {
+        "to": {
+          "type": "string"
+        },
+        "when": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "to"
+      ],
+      "title": "Goto",
+      "type": "object"
+    },
+    "Journey": {
+      "additionalProperties": true,
+      "description": "",
+      "properties": {
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "basis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Basis"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Default basis for the page's Facts; items may override it."
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "diagram": {
+          "description": "Journey diagram style.",
+          "pattern": "^(flowchart|sequence)$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generated": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Generated"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relations": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Map from relation name to a list of targets. A target is a concept ID or a mapping {to, basis, cites}. Checked by `lore check`."
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "stale_after": {
+          "description": "ISO 8601 instant; the page is stale on or after it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Status"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/Step"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "description": "OKF concept type, such as Entity or Rule.",
+          "type": "string"
+        },
+        "verified": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "OKF verification events; a list of {by, at} or a single mapping."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Journey",
+      "type": "object"
+    },
+    "Rule": {
+      "additionalProperties": true,
+      "description": "",
+      "properties": {
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "basis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Basis"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Default basis for the page's Facts; items may override it."
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generated": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Generated"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relations": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Map from relation name to a list of targets. A target is a concept ID or a mapping {to, basis, cites}. Checked by `lore check`."
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "stale_after": {
+          "description": "ISO 8601 instant; the page is stale on or after it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Status"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "description": "OKF concept type, such as Entity or Rule.",
+          "type": "string"
+        },
+        "verified": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "OKF verification events; a list of {by, at} or a single mapping."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Rule",
+      "type": "object"
+    },
+    "Screen": {
+      "additionalProperties": true,
+      "description": "",
+      "properties": {
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "basis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Basis"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Default basis for the page's Facts; items may override it."
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generated": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Generated"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relations": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Map from relation name to a list of targets. A target is a concept ID or a mapping {to, basis, cites}. Checked by `lore check`."
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "stale_after": {
+          "description": "ISO 8601 instant; the page is stale on or after it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Status"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "description": "OKF concept type, such as Entity or Rule.",
+          "type": "string"
+        },
+        "verified": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "OKF verification events; a list of {by, at} or a single mapping."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Screen",
+      "type": "object"
+    },
+    "SourceRef": {
+      "additionalProperties": true,
+      "description": "An OKF sources entry.",
+      "properties": {
+        "author": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "basis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Basis"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "description": "Key used by footnotes and `cites`.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "last_modified": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resource": {
+          "type": "string"
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version": {
+          "description": "Document or page version (domainlore extension).",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "resource"
+      ],
+      "title": "SourceRef",
+      "type": "object"
+    },
+    "SpecConflict": {
+      "additionalProperties": true,
+      "description": "",
+      "properties": {
+        "about": {
+          "description": "Concept IDs that a Gap or Spec Conflict is about.",
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "basis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Basis"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Default basis for the page's Facts; items may override it."
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generated": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Generated"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relations": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Map from relation name to a list of targets. A target is a concept ID or a mapping {to, basis, cites}. Checked by `lore check`."
+        },
+        "resolution": {
+          "description": "How a person resolved the Conflict; empty while open.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "stale_after": {
+          "description": "ISO 8601 instant; the page is stale on or after it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Status"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "description": "OKF concept type, such as Entity or Rule.",
+          "type": "string"
+        },
+        "verified": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "OKF verification events; a list of {by, at} or a single mapping."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "SpecConflict",
+      "type": "object"
+    },
+    "Status": {
+      "description": "OKF lifecycle status.",
+      "enum": [
+        "draft",
+        "stable",
+        "deprecated"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "Step": {
+      "additionalProperties": true,
+      "description": "",
+      "properties": {
+        "actor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "goto": {
+          "items": {
+            "$ref": "#/$defs/Goto"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "screen": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "Term": {
+      "additionalProperties": true,
+      "description": "",
+      "properties": {
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "basis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Basis"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Default basis for the page's Facts; items may override it."
+        },
+        "broader": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "definition": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generated": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Generated"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relations": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Map from relation name to a list of targets. A target is a concept ID or a mapping {to, basis, cites}. Checked by `lore check`."
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/SourceRef"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "stale_after": {
+          "description": "ISO 8601 instant; the page is stale on or after it.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Status"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "description": "OKF concept type, such as Entity or Rule.",
+          "type": "string"
+        },
+        "verified": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Any"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "OKF verification events; a list of {by, at} or a single mapping."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "Term",
+      "type": "object"
+    },
+    "Transition": {
+      "additionalProperties": true,
+      "description": "",
+      "properties": {
+        "basis": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Basis"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "cites": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "from": {
+          "type": "string"
+        },
+        "governed_by": {
+          "items": {
+            "type": "string"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        },
+        "to": {
+          "type": "string"
+        },
+        "trigger": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "from",
+        "to"
+      ],
+      "title": "Transition",
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/quark-sri/domainlore/schema",
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "additionalProperties": true,
+  "description": "",
+  "metamodel_version": "1.12.0",
+  "properties": {
+    "aliases": {
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "basis": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Basis"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Default basis for the page's Facts; items may override it."
+    },
+    "broader": {
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "definition": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "generated": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Generated"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "relations": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Any"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Map from relation name to a list of targets. A target is a concept ID or a mapping {to, basis, cites}. Checked by `lore check`."
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/SourceRef"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "stale_after": {
+      "description": "ISO 8601 instant; the page is stale on or after it.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Status"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tags": {
+      "items": {
+        "type": "string"
+      },
+      "type": [
+        "array",
+        "null"
+      ]
+    },
+    "title": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "type": {
+      "description": "OKF concept type, such as Entity or Rule.",
+      "type": "string"
+    },
+    "verified": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Any"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "OKF verification events; a list of {by, at} or a single mapping."
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "title": "domainlore",
+  "type": "object",
+  "version": "0.1.0"
+}

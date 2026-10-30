@@ -1,0 +1,12 @@
+---
+description: Use the project's domain Knowledge Base (knowledge/) for business rules, entities, journeys and screens
+alwaysApply: false
+---
+
+Business domain facts live in `knowledge/` (built with domainlore).
+
+- Start at `knowledge/index.md`; open only the Area and pages you need.
+- Each page cites its Sources. Prefer `human-reviewed` facts; treat `unverified` ones as hints.
+- `basis: intended` = what the product should do; `basis: actual` = what it does.
+- Check open Gaps and Spec Conflicts before you write tests or code.
+- For cross-cutting questions run `lore query "<question>"`, `lore explain <page>` or `lore path <a> <b>`.
