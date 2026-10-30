@@ -9,7 +9,7 @@ sources:
     title: Crawl of /orders/:id (2026-10-20)
   - id: policy
     resource: ../docs/approval-policy.md
-    title: Purchase approval policy v2
+    title: Purchase approval policy v2, rule 5
     basis: intended
 verified: { by: process:demo-crawl, at: 2026-10-20T12:00:00Z }
 relations:
@@ -24,7 +24,7 @@ relations:
 Route `/orders/:id`. Actions: Submit, Cancel.[^crawl] The policy expects a link to the approver's inbox; the crawl did not find one.[^policy]
 
 [^crawl]: Crawl of /orders/:id (2026-10-20)
-[^policy]: Purchase approval policy v2
+[^policy]: Purchase approval policy v2, rule 5
 
 <!-- generated:start relations -->
 ## Relations
@@ -39,4 +39,5 @@ Route `/orders/:id`. Actions: Submit, Cancel.[^crawl] The policy expects a link 
 - [New order](/ordering/screens/new-order.md) navigates to this _(actual)_
 - [Order list](/ordering/screens/order-list.md) navigates to this _(actual)_
 - ⚠ Gap (open): [Cancel without confirmation](/conflicts/cancel-without-confirmation.md)
+- ⚠ Gap (open): [No inbox link on Order details](/conflicts/no-inbox-link-on-order-details.md)
 <!-- generated:end relations -->

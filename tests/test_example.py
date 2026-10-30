@@ -20,6 +20,7 @@ def test_planted_conflicts_are_reported():
     assert open_conflicts == [
         "knowledge/conflicts/approval-threshold-amount.md",
         "knowledge/conflicts/cancel-without-confirmation.md",
+        "knowledge/conflicts/no-inbox-link-on-order-details.md",
     ]
 
 

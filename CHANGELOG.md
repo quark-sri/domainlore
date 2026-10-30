@@ -7,4 +7,5 @@
 - `lore init`, `build`, `check`, `query`, `explain`, `path`.
 - Generated indexes, Area maps, context map, glossary, Relations blocks, and Mermaid lifecycle, journey, ER and navigation diagrams.
 - `AGENTS.md` and `CLAUDE.md` pointer block, Cursor rule, `lore-use` skill, Claude Code plugin.
-- Demo product `examples/order-approval` with a planted Gap and Spec Conflict; retrieval eval.
+- Demo product `examples/order-approval` with two planted Gaps and a Spec Conflict; retrieval eval.
+- Journey steps: `goto: []` ends the journey at that step, so a branch end no longer leads to the next step.

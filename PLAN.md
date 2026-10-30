@@ -326,7 +326,7 @@ The `query` / `path` / `explain` commands mirror graphify's interface because ag
 2. ✅ **Create the repo** `quark-sri/domainlore` (public, Apache-2.0).
 3. ✅ **Scaffold**: `uv` package, Typer CLI, pytest, ruff, GitHub Actions (tests, demo check, retrieval eval, schema drift).
 4. ✅ **LinkML schema** `schema/domainlore.yaml` → JSON Schemas (`scripts/gen-schema.sh`). Pydantic models not generated yet; validation uses JSON Schema.
-5. ✅ **Demo Knowledge Base** `examples/order-approval/`: 18 pages, two Areas, one Gap, one Spec Conflict.
+5. ✅ **Demo Knowledge Base** `examples/order-approval/`: 19 pages, two Areas, two Gaps, one Spec Conflict.
 6. ✅ **`build` and `check`**: indexes, maps, glossary, Mermaid blocks, `.lore/graph.json`, golden test.
 7. ✅ **`query` / `path` / `explain`** (keyword + type hints; retrieval eval hit@5 93%).
 8. ✅ **`init`** (lore.toml, AGENTS.md / CLAUDE.md block, Cursor rule) and the `lore-use` skill + Claude Code plugin.

@@ -210,13 +210,15 @@ def journey(graph: Graph, concept: Concept) -> str | None:
             label += f"<br/><small>{graph.label(str(step['screen']))}</small>"
         lines.append(f"  {node_id(str(step['id']))}[{quote(label)}]")
     for i, step in enumerate(steps):
-        gotos = [g for g in step.get("goto") or [] if isinstance(g, dict) and g.get("to")]
-        if gotos:
-            for g in gotos:
+        # No `goto` leads to the next step; `goto: []` ends the journey at this step.
+        if step.get("goto") is None:
+            if i + 1 < len(steps):
+                lines.append(f"  {node_id(str(step['id']))} --> {node_id(str(steps[i + 1]['id']))}")
+            continue
+        for g in step["goto"]:
+            if isinstance(g, dict) and g.get("to"):
                 when = f"|{quote(str(g['when']))}|" if g.get("when") else ""
                 lines.append(f"  {node_id(str(step['id']))} -->{when} {node_id(str(g['to']))}")
-        elif i + 1 < len(steps):
-            lines.append(f"  {node_id(str(step['id']))} --> {node_id(str(steps[i + 1]['id']))}")
     return fenced(lines)
 
 

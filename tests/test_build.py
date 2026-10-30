@@ -123,3 +123,24 @@ def test_declared_edge_wins_over_implied(project):
     graph = Graph.build(load_bundle(config.knowledge_dir), config)
     [edge] = [e for e in graph.edges if e.rel == "governs"]
     assert not edge.implied and edge.basis_label == "intended"
+
+
+def test_journey_step_with_empty_goto_ends_the_flow(project):
+    project.write(
+        "shop/journeys/buy.md",
+        """
+    ---
+    type: Journey
+    sources: [{ id: s, resource: https://x }]
+    steps:
+      - { id: pay, label: Pay, goto: [{ to: failed, when: card declined }, { to: done }] }
+      - { id: failed, label: See error, goto: [] }
+      - { id: done, label: See receipt }
+    ---
+    # Buy
+    """,
+    )
+    build(project.config)
+    flow = (project.root / "knowledge" / "shop" / "journeys" / "buy.md").read_text()
+    assert 'n_pay -->|"card declined"| n_failed' in flow and "n_pay --> n_done" in flow
+    assert "n_failed -->" not in flow

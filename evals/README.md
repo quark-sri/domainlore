@@ -17,4 +17,12 @@ Measures whether an agent answers correctly, with citations, reading only the Kn
 
 | Date | Agent / model | Correct | Cited | Conflict-aware | Avg files read |
 |---|---|---|---|---|---|
-| | | | | | |
+| 2026-10-30 | Claude Code 2.1.314 / claude-opus-5-5 | 30/30 | 29/30 | 10/10 | 2.9 |
+
+Notes on the 2026-10-30 run:
+
+- Headless sessions (`claude -p`), one per question, with read-only tools: `Read`, `Grep`, `Glob` and `lore`. Every session started at `knowledge/index.md` and read 1 to 6 files.
+- Cited 29/30: for "What does PO mean?" the agent cited the PO Term page, not the Order page. The answer was correct.
+- Conflict-aware counts the 10 questions about the threshold or cancel; all 10 named the open Spec Conflict or Gap.
+- The agents found two defects in the demo, fixed since: a journey branch end led on to the next step, and a missing inbox link on Order details had no Gap page.
+- `lore query` was not used: the agents called it through `uv run`, which the session did not allow, so they read the files instead.

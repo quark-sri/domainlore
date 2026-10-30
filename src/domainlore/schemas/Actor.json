@@ -1110,6 +1110,7 @@
           ]
         },
         "goto": {
+          "description": "Next steps. Without it the step leads to the next one; an empty list ends the journey.",
           "items": {
             "$ref": "#/$defs/Goto"
           },

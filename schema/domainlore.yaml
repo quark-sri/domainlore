@@ -137,6 +137,7 @@ classes:
       screen:
       actor:
       goto:
+        description: Next steps. Without it the step leads to the next one; an empty list ends the journey.
         range: Goto
         multivalued: true
         inlined_as_list: true
