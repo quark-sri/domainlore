@@ -27,4 +27,5 @@ Route `/approvals`. Each row has Approve and Reject buttons.[^crawl]
 - navigates to → [Order details](/ordering/screens/order-details.md) _(actual)_
 - step of → [Approve an order](/approvals/journeys/approve-order.md)
 - [Order details](/ordering/screens/order-details.md) navigates to this _(intended)_
+- ⚠ Gap (open): [No inbox link on Order details](/conflicts/no-inbox-link-on-order-details.md)
 <!-- generated:end relations -->

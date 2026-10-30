@@ -18,7 +18,7 @@ steps:
     goto:
       - { to: blocked, when: total below 50 EUR }
       - { to: review, when: total at least 50 EUR }
-  - { id: blocked, label: See 'Order total too low', screen: ordering/screens/new-order }
+  - { id: blocked, label: See 'Order total too low', screen: ordering/screens/new-order, goto: [] }
   - { id: review, label: Review the submitted order, screen: ordering/screens/order-details }
 ---
 
@@ -42,7 +42,6 @@ flowchart TD
   n_create --> n_submit
   n_submit -->|"total below 50 EUR"| n_blocked
   n_submit -->|"total at least 50 EUR"| n_review
-  n_blocked --> n_review
 ```
 <!-- generated:end flow -->
 

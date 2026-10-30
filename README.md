@@ -79,7 +79,7 @@ The full field reference is in [skills/lore-use/page-format.md](skills/lore-use/
 
 Diagrams encode basis and trust: dashed = intended only, orange = actual only, red ⚠ = open Gap, grey = unverified.
 
-See the demo product in [examples/order-approval/](examples/order-approval/knowledge/index.md); it has one planted Gap and one planted Spec Conflict.
+See the demo product in [examples/order-approval/](examples/order-approval/knowledge/index.md); it has two planted Gaps and one planted Spec Conflict.
 
 ## Use it from your agent
 

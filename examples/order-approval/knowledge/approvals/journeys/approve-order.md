@@ -39,4 +39,5 @@ sequenceDiagram
 - [Approver](/approvals/actors/approver.md) performs this _(intended)_
 - [Approval inbox](/approvals/screens/approval-inbox.md) step of this
 - [Order details](/ordering/screens/order-details.md) step of this
+- ⚠ Gap (open): [No inbox link on Order details](/conflicts/no-inbox-link-on-order-details.md)
 <!-- generated:end relations -->

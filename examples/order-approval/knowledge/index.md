@@ -24,3 +24,4 @@ okf_version: "0.2"
 
 * [Approval threshold amount](conflicts/approval-threshold-amount.md) - Spec Conflict: Confluence says 10 000 EUR, the BRD says 5 000 EUR.
 * [Cancel without confirmation](conflicts/cancel-without-confirmation.md) - Gap: The policy asks the buyer to confirm a cancel; the app cancels at once.
+* [No inbox link on Order details](conflicts/no-inbox-link-on-order-details.md) - Gap: The policy expects a link from Order details to the approver's inbox; the app has none.

@@ -6,3 +6,4 @@
 2. The approver must not be the buyer who placed the order (four-eyes principle).
 3. An approval request that is not decided within 3 working days is escalated to the finance lead.
 4. Cancelling a submitted order asks the buyer to confirm.
+5. The order details page links back to the approver's inbox.

@@ -63,7 +63,7 @@ Add relation types in `lore.toml` under `[relations.<name>]` with `label`, `from
 
 **Entity**: `states` (list) and `transitions`, each `{from, to, trigger, governed_by: [rules], basis, cites: [source ids]}`. Rendered as a state diagram.
 
-**Journey**: `steps`, each `{id, label, screen, actor, goto: [{to, when}]}`; without `goto` a step leads to the next one. `diagram: sequence` renders a sequence diagram instead of a flowchart.
+**Journey**: `steps`, each `{id, label, screen, actor, goto: [{to, when}]}`; without `goto` a step leads to the next one, and `goto: []` ends the journey at that step. `diagram: sequence` renders a sequence diagram instead of a flowchart.
 
 **Term**: `definition`, `broader`, and `relations: {aka: [page]}` when the term is another word for a page.
 

@@ -23,13 +23,13 @@ _Labels: (intended) = specified only · (actual) = seen in app or code only._
 
 ```mermaid
 flowchart LR
-  n_approvals_screens_approval_inbox["Approval inbox"]
+  n_approvals_screens_approval_inbox["⚠ Approval inbox"]
   n_ordering_screens_order_details["⚠ Order details"]
   n_approvals_screens_approval_inbox -->|"navigates to"| n_ordering_screens_order_details
   linkStyle 0 stroke:#e67e00,stroke-width:2px
   classDef gap fill:#fde2e2,stroke:#c00,color:#900
   classDef unverified color:#777,stroke:#aaa
-  class n_ordering_screens_order_details gap
+  class n_approvals_screens_approval_inbox,n_ordering_screens_order_details gap
 ```
 
 _Legend: dashed arrow = intended only (not seen in app or code) · orange arrow = actual only (not specified) · red ⚠ = open Gap · grey = unverified._
