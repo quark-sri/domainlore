@@ -22,6 +22,7 @@ def test_planted_conflicts_are_reported():
         "knowledge/conflicts/cancel-without-confirmation.md",
         "knowledge/conflicts/no-inbox-link-on-order-details.md",
     ]
+    assert {i.code for i in issues if i.level == "warning"} == {"open-conflict"}
 
 
 def test_build_is_idempotent(example):

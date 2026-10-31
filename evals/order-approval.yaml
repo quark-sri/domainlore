@@ -33,3 +33,4 @@ questions:
   - { q: "Which rules govern approval requests?", expect: [approvals/rules/four-eyes, approvals/rules/approval-threshold] }
   - { q: "Can a submitted order be cancelled?", expect: ordering/entities/order }
   - { q: "What columns does the order list show?", expect: ordering/screens/order-list }
+  - { q: "Can the approver get back to the inbox from an order?", expect: conflicts/no-inbox-link-on-order-details }

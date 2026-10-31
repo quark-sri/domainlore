@@ -1,7 +1,7 @@
 ---
 type: Rule
 title: Four-eyes principle
-description: The Approver of an Order must not be the Buyer who placed it.
+description: The Approver of an Order must not be the Buyer who placed it; a Buyer cannot approve their own Order.
 basis: intended
 sources:
   - id: policy

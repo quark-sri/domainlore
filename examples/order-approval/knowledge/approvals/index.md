@@ -9,7 +9,7 @@
 # Rules
 
 * [Approval threshold](rules/approval-threshold.md) - Orders above a total amount need approval before processing. _(unverified)_
-* [Four-eyes principle](rules/four-eyes.md) - The Approver of an Order must not be the Buyer who placed it.
+* [Four-eyes principle](rules/four-eyes.md) - The Approver of an Order must not be the Buyer who placed it; a Buyer cannot approve their own Order.
 
 # Actors
 

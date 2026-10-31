@@ -172,3 +172,48 @@ def test_verified_list_and_timestamps_pass_schema(project):
     )
     build(project.config)
     assert codes(project) == []
+
+
+def test_intended_fact_on_actual_page_needs_a_gap_page(project):
+    project.write(
+        "shop/screens/cart.md",
+        """
+    ---
+    type: Screen
+    basis: actual
+    sources: [{ id: crawl, resource: https://app/cart }, { id: spec, resource: https://wiki/cart }]
+    relations:
+      navigates_to: [{ to: shop/screens/help, basis: intended, cites: [spec] }]
+    ---
+    # Cart
+    """,
+    )
+    project.write(
+        "shop/screens/help.md",
+        "---\ntype: Screen\nbasis: actual\nsources: [{ id: s, resource: https://app/help }]\n---\n",
+    )
+    assert codes(project, "warning") == ["unrecorded-gap"]
+    [issue] = [i for i in run_check(project.config) if i.code == "unrecorded-gap"]
+    assert "`about: [shop/screens/cart, shop/screens/help]`" in issue.message
+    gap = """
+    ---
+    type: Gap
+    about: [{about}]
+    sources: [{{ id: crawl, resource: https://app/cart }}, {{ id: spec, resource: https://wiki }}]
+    ---
+    # No link
+    """
+    project.write("conflicts/other.md", gap.format(about="shop/screens/cart"))
+    assert "unrecorded-gap" in codes(project, "warning")  # a Gap on the page, not on this link
+    project.write(
+        "conflicts/no-link.md",
+        """
+    ---
+    type: Gap
+    about: [shop/screens/cart, shop/screens/help]
+    sources: [{ id: crawl, resource: https://app/cart }, { id: spec, resource: https://wiki/cart }]
+    ---
+    # No link
+    """,
+    )
+    assert "unrecorded-gap" not in codes(project, "warning")

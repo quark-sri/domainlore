@@ -1,7 +1,7 @@
 ---
 type: Actor
 title: Buyer
-description: A person who creates and submits Orders for a Customer.
+description: A person who places Orders for a Customer; the Buyer creates and submits them.
 aliases: [Requester]
 basis: intended
 sources:

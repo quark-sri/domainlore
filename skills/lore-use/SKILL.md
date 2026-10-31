@@ -23,8 +23,8 @@ Done when every domain claim in your output **cites** its page (and footnote sou
 Follow [page-format.md](page-format.md) for the frontmatter fields.
 
 1. Edit the page's frontmatter or body; add a `sources` entry with an `id` and cite it with a footnote `[^id]`.
-2. Two sources disagree → create a page in `knowledge/conflicts/` with `type: Gap` (intended vs actual) or `type: Spec Conflict` (intended vs intended), `about:` the affected pages, and both sources.
+2. Two sources disagree → create a page in `knowledge/conflicts/` with `type: Gap` (intended vs actual) or `type: Spec Conflict` (intended vs intended), `about:` the affected pages, and both sources. An `intended` relation or transition on a page with `basis: actual` is a Gap too.
 3. An ambiguity the sources and the code cannot settle → add it to `knowledge/questions.md` and leave the fact without `verified`.
 4. Run `lore build`, then `lore check`.
 
-Done when `lore check` reports 0 errors. Generated blocks and files are rebuilt from frontmatter, so every change goes into frontmatter or prose outside the `generated` markers.
+Done when `lore check` reports 0 errors and no `unrecorded-gap` warning for the pages you changed; `open-conflict` warnings are expected. Generated blocks and files are rebuilt from frontmatter, so every change goes into frontmatter or prose outside the `generated` markers.

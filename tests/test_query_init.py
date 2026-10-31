@@ -7,7 +7,7 @@ from domainlore.cli import app
 from domainlore.config import load_config
 from domainlore.graph import Graph
 from domainlore.init import END, START, init
-from domainlore.query import explain, path, query, stem
+from domainlore.query import explain, path, query, rarity, score, stem
 from tests.conftest import EXAMPLE
 
 
@@ -23,6 +23,38 @@ def test_stem_joins_word_forms():
 def test_query_ranks_the_matching_rule_first():
     first = query(example_graph(), "minimum order value").splitlines()[0]
     assert first.startswith("ordering/rules/minimum-order-value")
+
+
+def test_rare_words_count_more_than_common_ones():
+    graph = example_graph()
+    pages = [c for c in graph.bundle.concepts.values() if not c.is_generated]
+    weight = rarity(pages, ["own", "order"])
+    assert weight["own"] > weight["order"] > 0
+
+
+def project_graph(project) -> Graph:
+    return Graph.build(source_bundle(project.config), project.config)
+
+
+def test_a_rare_word_match_outranks_a_common_word_match(project):
+    for slug in ("order-a", "order-b", "order-c"):
+        project.write(
+            f"shop/entities/{slug}.md",
+            f"---\ntype: Entity\ntitle: Order {slug[-1]}\ndescription: An order.\n---\n",
+        )
+    project.write("shop/rules/own.md", "---\ntype: Rule\ntitle: Own\n---\n")
+    graph = project_graph(project)
+    terms = ["own", "order"]
+    own, order = (
+        graph.bundle.concepts["shop/rules/own"],
+        graph.bundle.concepts["shop/entities/order-a"],
+    )
+    assert score(own, terms) < score(order, terms)  # unweighted, the common word wins
+    assert query(graph, "own order").startswith("shop/rules/own ")
+
+
+def test_query_on_a_bundle_without_pages_finds_nothing(project):
+    assert query(project_graph(project), "order approval").startswith("No match")
 
 
 def test_term_resolves_to_its_node():
