@@ -20,7 +20,7 @@ A person who accepts or rejects Approval Requests.
 ## Ordering
 
 **[Buyer](/ordering/actors/buyer.md)**:
-A person who creates and submits Orders for a Customer.
+A person who places Orders for a Customer; the Buyer creates and submits them.
 _Avoid_: Requester
 
 **[Customer](/ordering/entities/customer.md)**:

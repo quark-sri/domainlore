@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import re
 
 from .bundle import Concept
@@ -80,7 +81,12 @@ def hinted_types(text: str) -> set[str]:
     return set().union(*(TYPE_HINTS.get(w, set()) for w in WORD.findall(text.lower())))
 
 
-def score(concept: Concept, terms: list[str], hints: set[str] = frozenset()) -> float:
+def score(
+    concept: Concept,
+    terms: list[str],
+    hints: set[str] = frozenset(),
+    weight: dict[str, float] | None = None,
+) -> float:
     if not terms:
         return 0.0
     title = set(words(concept.title))
@@ -90,13 +96,22 @@ def score(concept: Concept, terms: list[str], hints: set[str] = frozenset()) -> 
     body = words(concept.body)
     total = 0.0
     for t in terms:
-        total += 6 * (t in title) + 4 * (t in aliases) + 3 * (t in ident) + 2 * (t in description)
-        total += min(body.count(t), 3) * 0.5
+        hit = 6 * (t in title) + 4 * (t in aliases) + 3 * (t in ident) + 2 * (t in description)
+        hit += min(body.count(t), 3) * 0.5
+        total += hit * (weight or {}).get(t, 1.0)
     if " ".join(terms) == " ".join(words(concept.title)):
         total += 10
     if total and concept.type in hints:
         total += 4
     return total
+
+
+def rarity(pages: list[Concept], terms: list[str]) -> dict[str, float]:
+    """Weight each term by how few pages use it, so 'own' counts more than 'order'."""
+    texts = [set(words(f"{c.title} {c.id} {c.description} {c.body}")) for c in pages]
+    if not texts:
+        return {}
+    return {t: 1 + math.log(len(texts) / (1 + sum(t in x for x in texts))) for t in set(terms)}
 
 
 def resolve(graph: Graph, name: str) -> Concept | None:
@@ -141,8 +156,10 @@ def edge_line(graph: Graph, e: Edge, from_id: str) -> str:
 def query(graph: Graph, text: str, limit: int = 5) -> str:
     terms = words(text)
     hints = hinted_types(text)
+    pages = [c for c in graph.bundle.concepts.values() if not c.is_generated]
+    weight = rarity(pages, terms)
     ranked = sorted(
-        ((score(c, terms, hints), c) for c in graph.bundle.concepts.values() if not c.is_generated),
+        ((score(c, terms, hints, weight), c) for c in pages),
         key=lambda pair: (-pair[0], pair[1].id),
     )
     hits: list[Concept] = []

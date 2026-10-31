@@ -67,7 +67,7 @@ Add relation types in `lore.toml` under `[relations.<name>]` with `label`, `from
 
 **Term**: `definition`, `broader`, and `relations: {aka: [page]}` when the term is another word for a page.
 
-**Gap / Spec Conflict**: `about` (pages it concerns), at least two sources, and `resolution` once a person settles it. A Gap is intended vs actual; a Spec Conflict is intended vs intended.
+**Gap / Spec Conflict**: `about` (pages it concerns), at least two sources, and `resolution` once a person settles it. A Gap is intended vs actual; a Spec Conflict is intended vs intended. `lore check` warns `unrecorded-gap` when a page with `basis: actual` states an intended-only relation or transition that no Gap records. A Gap records a relation when its `about` lists both the page and the target, and a transition when its `about` lists the page.
 
 ## Generated content
 

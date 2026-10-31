@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- `lore check` warns `unrecorded-gap` for an intended-only relation or transition on a page with `basis: actual` that no Gap page records. The exit code is unchanged, but `lore check --strict` now fails on it. To fix it, add a Gap page whose `about` lists the page and the relation target.
+- `lore query` weights rare words above common ones; retrieval eval hit@5 is now 100%.
+- Clearer Buyer and Four-eyes descriptions; a retrieval and agent-eval question for the inbox-link Gap.
+
 ## v0.1.0 (2026-10-30)
 
 - OKF v0.2 Knowledge Base with seven domain types, typed relations, basis and trust tiers.

@@ -1,3 +1,3 @@
 # Actors
 
-* [Buyer](buyer.md) - A person who creates and submits Orders for a Customer.
+* [Buyer](buyer.md) - A person who places Orders for a Customer; the Buyer creates and submits them.

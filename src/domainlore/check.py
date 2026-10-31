@@ -15,7 +15,7 @@ from jsonschema import Draft202012Validator
 from .build import render
 from .bundle import CONFLICT_TYPES, DOMAIN_TYPES, Bundle, Concept, load_bundle
 from .config import Config
-from .graph import BASES, Graph, declared_edges
+from .graph import BASES, Graph, declared_edges, parse_basis
 
 KNOWN_TYPES = (
     DOMAIN_TYPES | CONFLICT_TYPES | {"Glossary", "Context Map", "Area Map", "Open Questions"}
@@ -103,6 +103,7 @@ class Checker:
             self.check_steps(c)
         if c.type in CONFLICT_TYPES:
             self.check_conflict(c)
+        self.check_unrecorded_gap(c)
         self.check_stale(c)
         self.check_body_links(c)
 
@@ -224,6 +225,36 @@ class Checker:
         if c.is_open_conflict:
             self.add(
                 "warning", "open-conflict", c.path, f"open {c.type}: {c.description or c.title}"
+            )
+
+    def check_unrecorded_gap(self, c: Concept) -> None:
+        """An intended-only Fact on a page observed as actual is a Gap; it needs a Gap page."""
+        if parse_basis(c.meta.get("basis")) != {"actual"}:
+            return
+        gaps = [
+            {str(a) for a in g.meta.get("about") or []}
+            for e in self.graph.into.get(c.id, [])
+            if e.rel == "about" and (g := self.graph.concept(e.src)) is not None and g.type == "Gap"
+        ]
+        # A relation is recorded by a Gap about both its ends; a transition by any Gap on the page.
+        facts = [
+            (f"{e.rel} → `{e.dst}`", f"[{c.id}, {e.dst}]")
+            for e in declared_edges(c)
+            if e.basis == {"intended"} and not any(e.dst in about for about in gaps)
+        ]
+        if not gaps:
+            facts += [
+                (f"transition {t.get('from')} → {t.get('to')}", f"[{c.id}]")
+                for t in c.meta.get("transitions") or []
+                if isinstance(t, dict) and parse_basis(t.get("basis")) == {"intended"}
+            ]
+        for fact, about in facts:
+            self.add(
+                "warning",
+                "unrecorded-gap",
+                c.path,
+                f"{fact} is intended only on an actual page; "
+                f"add a Gap page in conflicts/ with `about: {about}`",
             )
 
     def check_stale(self, c: Concept) -> None:

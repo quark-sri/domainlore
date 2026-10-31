@@ -26,7 +26,7 @@ jobs:
       - name: Demo Knowledge Base is current and valid
         run: uv run lore check --root examples/order-approval
       - name: Retrieval eval
-        run: uv run python evals/retrieval.py --min-hit 0.9
+        run: uv run python evals/retrieval.py --min-hit 0.96 --min-hit1 0.7
 
   schema:
     runs-on: ubuntu-latest

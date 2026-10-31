@@ -1,6 +1,7 @@
 """Retrieval eval: does `lore query` put the answering page in its top results?
 
-Usage: uv run python evals/retrieval.py [evals/order-approval.yaml] [--k 5] [--min-hit 0.9]
+Usage: uv run python evals/retrieval.py [evals/order-approval.yaml] [--k 5]
+       [--min-hit 0.96] [--min-hit1 0.7]
 """
 
 from __future__ import annotations
@@ -47,12 +48,13 @@ def main() -> int:
     parser.add_argument("spec", nargs="?", default=str(REPO / "evals" / "order-approval.yaml"))
     parser.add_argument("--k", type=int, default=5)
     parser.add_argument("--min-hit", type=float, default=0.0, help="Fail below this hit@k.")
+    parser.add_argument("--min-hit1", type=float, default=0.0, help="Fail below this hit@1.")
     args = parser.parse_args()
     at_1, at_k, misses = evaluate(Path(args.spec), args.k)
     print(f"hit@1 {at_1:.0%}  hit@{args.k} {at_k:.0%}")
     for miss in misses:
         print(f"  miss: {miss}")
-    return 0 if at_k >= args.min_hit else 1
+    return 0 if at_k >= args.min_hit and at_1 >= args.min_hit1 else 1
 
 
 if __name__ == "__main__":
