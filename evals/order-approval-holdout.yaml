@@ -1,0 +1,17 @@
+# Held-out questions about the demo product. Never edit them to fix a miss, and never tune
+# `lore query` against them: they show whether a ranking change helps on questions it was not
+# chosen for. Written 2026-11-01 from the domain, without running `lore query` on them.
+knowledge: examples/order-approval
+questions:
+  - { q: "Who signs off on purchases?", expect: approvals/actors/approver }
+  - { q: "What happens if nobody decides on a request for a few days?", expect: approvals/entities/approval-request }
+  - { q: "Can I submit an order worth 20 euros?", expect: ordering/rules/minimum-order-value }
+  - { q: "Which company does a buyer work for?", expect: [ordering/entities/customer, ordering/actors/buyer] }
+  - { q: "What price is stored on each line of an order?", expect: ordering/entities/order-line }
+  - { q: "Does the order page link to the approvals screen?", expect: conflicts/no-inbox-link-on-order-details }
+  - { q: "What does finance call an order?", expect: [ordering/terms/po, ordering/entities/order] }
+  - { q: "Where does a buyer save a draft?", expect: ordering/screens/new-order }
+  - { q: "Which sources disagree about when approval is needed?", expect: conflicts/approval-threshold-amount }
+  - { q: "What can an approver do from the inbox?", expect: approvals/screens/approval-inbox }
+  - { q: "What states does an approval request go through?", expect: approvals/entities/approval-request }
+  - { q: "Does an order need a second person to check it?", expect: [approvals/rules/four-eyes, approvals/rules/approval-threshold] }

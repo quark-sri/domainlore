@@ -217,3 +217,39 @@ def test_intended_fact_on_actual_page_needs_a_gap_page(project):
     """,
     )
     assert "unrecorded-gap" not in codes(project, "warning")
+
+
+BOX = """
+---
+type: Entity
+basis: {basis}
+sources: [{{ id: s, resource: https://app/box }}]
+states: [a, b]
+transitions: [{{ from: a, to: b, basis: {transition} }}]
+---
+# Box
+"""
+
+
+def unrecorded(project) -> list[str]:
+    return [i.message for i in run_check(project.config) if i.code == "unrecorded-gap"]
+
+
+def test_intended_transition_on_actual_page_needs_a_gap_about_the_page(project):
+    project.write("shop/entities/box.md", BOX.format(basis="actual", transition="intended"))
+    [message] = unrecorded(project)
+    assert "transition a → b" in message and "`about: [shop/entities/box]`" in message
+    project.write(
+        "conflicts/box.md",
+        "---\ntype: Gap\nabout: [shop/entities/box]\n"
+        "sources: [{ id: s, resource: https://x }]\n---\n",
+    )
+    assert unrecorded(project) == []  # any Gap about the page records its transitions
+
+
+def test_unrecorded_gap_only_checks_pages_observed_as_actual(project):
+    project.write("shop/entities/box.md", BOX.format(basis="actual", transition="actual"))
+    mixed = BOX.format(basis="[actual, intended]", transition="intended")
+    project.write("shop/entities/mixed.md", mixed)
+    project.write("shop/entities/spec.md", BOX.format(basis="intended", transition="intended"))
+    assert unrecorded(project) == []
