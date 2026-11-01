@@ -4,7 +4,11 @@
 
 `uv run python evals/retrieval.py --min-hit 0.96 --min-hit1 0.7` asks every question in [order-approval.yaml](order-approval.yaml) through `lore query` and reports hit@1 and hit@5 (the expected page among the top 1 or 5 results). CI fails below 96% hit@5 or 70% hit@1, just under the current result. Raise the floors when the result improves.
 
-Current result: **hit@1 74%, hit@5 100%** (31 questions). `lore query` weights rare words above common ones, so "own" counts more than "order". Fix a new miss in the pages first (aliases, descriptions), not by tuning weights to this question set.
+Current result: **hit@1 71%, hit@5 97%** (31 questions). The one miss is "Can a buyer approve their own order?": the Approve-an-order journey matches "approve … order" in its title. Fix misses in the pages (aliases, descriptions), not by tuning weights to this question set.
+
+[order-approval-holdout.yaml](order-approval-holdout.yaml) holds 12 questions that no change was chosen on: **hit@1 67%, hit@5 83%**. Judge every change to `lore query` ranking on both sets, and never edit a held-out question to fix a miss. It has no CI gate. Run it with `uv run python evals/retrieval.py evals/order-approval-holdout.yaml`.
+
+Rarity (IDF) weighting was tried on 2026-10-31 and removed on 2026-11-01. It raised the main set to 74% / 100%, but that set was used to choose it. On the held-out set it lowered hit@1 from 67% to 58% and left hit@5 at 83%.
 
 ## Agent (manual)
 
@@ -27,6 +31,7 @@ Measures whether an agent answers correctly, with citations, reading only the Kn
 |---|---|---|---|---|---|---|
 | 2026-10-30 | 834efc5 | Claude Code 2.1.314 / claude-opus-5-5 | 30/30 | 29/30 | 10/10 | 2.9 |
 | 2026-10-31 | a00183a + uncommitted edits (not comparable) | Claude Code 2.1.314 / claude-opus-5-5 | 31/31 | 29/31 | 10/11 | 2.1 |
+| 2026-11-01 | 9d33d97 | Claude Code 2.1.314 / claude-opus-5-5 | 31/31 | 30/31 | 10/11 | 2.6 |
 
 Notes on the 2026-10-30 run:
 
@@ -44,3 +49,10 @@ Notes on the 2026-10-31 run:
 - Cited 29/31: the PO question cited the PO Term page again; "Who approves orders?" gave no page path for the Approver.
 - Conflict-aware 10/11: the 11 include the new inbox-link Gap question. "Can a buyer approve their own order?" did not mention the threshold Spec Conflict.
 - Three sessions ran `git diff` and saw uncommitted page edits. Run the eval on a clean tree.
+
+Notes on the 2026-11-01 run:
+
+- Clean tree at `9d33d97`, with the command in step 1. `lore query` was used in 3 of 31 sessions.
+- Cited 30/31: the PO question cited the PO Term page, not the Order page, as in every run.
+- Conflict-aware 10/11: "Can a buyer approve their own order?" did not mention the threshold Spec Conflict, as in the 2026-10-31 run.
+- One session found that the Order page's Relations list gives the implied four-eyes `governs` link no basis label, while its diagram marks it intended.
