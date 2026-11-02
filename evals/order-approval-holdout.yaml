@@ -1,6 +1,7 @@
 # Held-out questions about the demo product. Never edit them to fix a miss, and never tune
 # `lore query` against them: they show whether a ranking change helps on questions it was not
-# chosen for. Written 2026-11-01 from the domain, without running `lore query` on them.
+# chosen for. Batch 1, written 2026-11-01 from the domain, without running `lore query` on them;
+# its author had read the scoring code. Used once: to decide the removal of rarity weighting.
 knowledge: examples/order-approval
 questions:
   - { q: "Who signs off on purchases?", expect: approvals/actors/approver }

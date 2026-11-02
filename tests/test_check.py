@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
+import pytest
+
 from domainlore.build import build
 from domainlore.check import run_check
 
@@ -235,21 +237,47 @@ def unrecorded(project) -> list[str]:
     return [i.message for i in run_check(project.config) if i.code == "unrecorded-gap"]
 
 
-def test_intended_transition_on_actual_page_needs_a_gap_about_the_page(project):
+def conflict(project, name: str, kind: str, about: str) -> None:
+    project.write(
+        f"conflicts/{name}.md",
+        f"---\ntype: {kind}\nabout: [{about}]\nsources: [{{ id: s, resource: https://x }}]\n---\n",
+    )
+
+
+def test_intended_transition_on_actual_page_warns(project):
     project.write("shop/entities/box.md", BOX.format(basis="actual", transition="intended"))
     [message] = unrecorded(project)
     assert "transition a → b" in message and "`about: [shop/entities/box]`" in message
-    project.write(
-        "conflicts/box.md",
-        "---\ntype: Gap\nabout: [shop/entities/box]\n"
-        "sources: [{ id: s, resource: https://x }]\n---\n",
-    )
+
+
+def test_a_gap_about_the_page_records_its_transitions(project):
+    project.write("shop/entities/box.md", BOX.format(basis="actual", transition="intended"))
+    conflict(project, "box", "Gap", "shop/entities/box")
     assert unrecorded(project) == []  # any Gap about the page records its transitions
 
 
-def test_unrecorded_gap_only_checks_pages_observed_as_actual(project):
-    project.write("shop/entities/box.md", BOX.format(basis="actual", transition="actual"))
-    mixed = BOX.format(basis="[actual, intended]", transition="intended")
-    project.write("shop/entities/mixed.md", mixed)
-    project.write("shop/entities/spec.md", BOX.format(basis="intended", transition="intended"))
-    assert unrecorded(project) == []
+@pytest.mark.parametrize(
+    ("kind", "about"),
+    [("Gap", "shop/entities/other"), ("Spec Conflict", "shop/entities/box")],
+    ids=["gap-about-another-page", "spec-conflict-about-the-page"],
+)
+def test_only_a_gap_about_the_page_records_its_transitions(project, kind, about):
+    project.write("shop/entities/box.md", BOX.format(basis="actual", transition="intended"))
+    project.write("shop/entities/other.md", BOX.format(basis="intended", transition="intended"))
+    conflict(project, "other", kind, about)
+    assert len(unrecorded(project)) == 1
+
+
+# Each page also has an intended `has` relation. Only the actual page warns, and only for that
+# relation: its own transition is actual, and the other pages are not checked at all.
+@pytest.mark.parametrize(
+    ("basis", "transition", "warnings"),
+    [("actual", "actual", 1), ("[actual, intended]", "intended", 0), ("intended", "intended", 0)],
+    ids=["actual-transition", "mixed-basis-page", "intended-page"],
+)
+def test_unrecorded_gap_only_checks_pages_observed_as_actual(project, basis, transition, warnings):
+    page = BOX.format(basis=basis, transition=transition).replace(
+        "---\n# Box", "relations:\n  has: [{ to: shop/entities/box, basis: intended }]\n---\n# Box"
+    )
+    project.write("shop/entities/box.md", page)
+    assert len(unrecorded(project)) == warnings

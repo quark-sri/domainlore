@@ -2,13 +2,22 @@
 
 ## Retrieval (automated, in CI)
 
-`uv run python evals/retrieval.py --min-hit 0.96 --min-hit1 0.7` asks every question in [order-approval.yaml](order-approval.yaml) through `lore query` and reports hit@1 and hit@5 (the expected page among the top 1 or 5 results). CI fails below 96% hit@5 or 70% hit@1, just under the current result. Raise the floors when the result improves.
+`uv run python evals/retrieval.py --min-hit 0.96 --min-hit1 0.7` asks every question in [order-approval.yaml](order-approval.yaml) through `lore query` and reports hit@1 and hit@5 (the expected page among the top 1 or 5 results). CI fails below 96% hit@5 or 70% hit@1. The floors are a tripwire with no slack: the main set is at 30/31 and 22/31, so one more miss fails the build. A failure means fix the page (or a question's `expect` if it was wrong), not the floor. Change a floor only by owner decision, with a note here. CI also prints the held-out result, without a gate, until the held-out set has about 30 questions.
 
 Current result: **hit@1 71%, hit@5 97%** (31 questions). The one miss is "Can a buyer approve their own order?": the Approve-an-order journey matches "approve … order" in its title. Fix misses in the pages (aliases, descriptions), not by tuning weights to this question set.
 
-[order-approval-holdout.yaml](order-approval-holdout.yaml) holds 12 questions that no change was chosen on: **hit@1 67%, hit@5 83%**. Judge every change to `lore query` ranking on both sets, and never edit a held-out question to fix a miss. It has no CI gate. Run it with `uv run python evals/retrieval.py evals/order-approval-holdout.yaml`.
+[order-approval-holdout.yaml](order-approval-holdout.yaml) holds 12 held-out questions (batch 1, 2026-11-01): **hit@1 8/12 (67%), hit@5 10/12 (83%)**. The two hit@5 misses are "Who signs off on purchases?" and "Does an order need a second person to check it?". Never edit a held-out question, and do not edit pages to fix a held-out miss. It has no CI gate. Run it with `uv run python evals/retrieval.py evals/order-approval-holdout.yaml`.
 
-Rarity (IDF) weighting was tried on 2026-10-31 and removed on 2026-11-01. It raised the main set to 74% / 100%, but that set was used to choose it. On the held-out set it lowered hit@1 from 67% to 58% and left hit@5 at 83%.
+Batch 1 has been used for one decision, the removal of rarity weighting below, so it is no longer clean for ranking changes. Judge the next ranking change on a fresh batch, written before the change and added with its date. Its author had read the scoring code, and three of its questions accept two pages; a better batch has one expected page per question and comes from someone who has not read `score()`. At 12 questions, one question moves hit@1 by 8 points.
+
+Rarity (IDF) weighting was tried on 2026-10-31 (commit `9d33d97`, `rarity()` in `src/domainlore/query.py`) and removed on 2026-11-01:
+
+| Set | With IDF hit@1 / hit@5 | Without IDF |
+|---|---|---|
+| Main (31, used to choose IDF) | 23/31 / 31/31 | 22/31 / 30/31 |
+| Held-out batch 1 (12) | 7/12 / 10/12 | 8/12 / 10/12 |
+
+On each set the difference is one question, so the evidence is weak either way. IDF was removed because it gave no gain on questions it was not chosen on and it added code. On the held-out set, "Can I submit an order worth 20 euros?" lost first place to the Place-an-order journey.
 
 ## Agent (manual)
 
@@ -52,7 +61,7 @@ Notes on the 2026-10-31 run:
 
 Notes on the 2026-11-01 run:
 
-- Clean tree at `9d33d97`, with the command in step 1. `lore query` was used in 3 of 31 sessions.
+- Clean tree at `9d33d97`, with the command in step 1. That commit still had rarity (IDF) weighting, removed since. `lore query` was used in 3 of 31 sessions, so this run says little about ranking.
 - Cited 30/31: the PO question cited the PO Term page, not the Order page, as in every run.
 - Conflict-aware 10/11: "Can a buyer approve their own order?" did not mention the threshold Spec Conflict, as in the 2026-10-31 run.
 - One session found that the Order page's Relations list gives the implied four-eyes `governs` link no basis label, while its diagram marks it intended.

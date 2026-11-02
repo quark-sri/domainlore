@@ -3,7 +3,8 @@
 ## Unreleased
 
 - `lore check` warns `unrecorded-gap` for an intended-only relation or transition on a page with `basis: actual` that no Gap page records. The exit code is unchanged, but `lore check --strict` now fails on it. To fix it, add a Gap page whose `about` lists the page and the relation target.
-- A held-out retrieval question set (12 questions) to judge `lore query` ranking changes. CI also gates hit@1.
+- CI gates retrieval hit@1 (70%) as well as hit@5 (96%).
+- A held-out retrieval question set (12 questions) to judge `lore query` ranking changes. CI prints its result without a gate.
 - Clearer Buyer and Four-eyes descriptions; a retrieval and agent-eval question for the inbox-link Gap.
 
 ## v0.1.0 (2026-10-30)
