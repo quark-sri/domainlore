@@ -12,6 +12,7 @@ from .build import build as run_build
 from .build import source_bundle
 from .check import as_json, run_check
 from .config import find_root, load_config
+from .convert import convert as run_convert
 from .graph import Graph
 from .init import init as run_init
 from .query import explain as run_explain
@@ -85,6 +86,20 @@ def check(
         typer.echo(f"{len(errors)} error(s), {len(warnings)} warning(s).")
     if errors or (strict and warnings):
         raise typer.Exit(1)
+
+
+@app.command()
+def convert(root: RootOption = None) -> None:
+    """Convert source documents to cached text with offsets, for exact citations."""
+    config = config_for(root)
+    if not config.sources:
+        typer.echo("No sources in lore.toml; add [[sources]] with a `path`.")
+        raise typer.Exit(1)
+    outcomes = run_convert(config)
+    for rel, outcome in outcomes:
+        typer.echo(f"{outcome:10} {rel}" if " " not in outcome else f"{rel}: {outcome}")
+    done = sum(o in ("converted", "updated") for _, o in outcomes)
+    typer.echo(f"{done} converted, {len(outcomes) - done} not changed.")
 
 
 @app.command()

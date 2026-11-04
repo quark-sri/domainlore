@@ -23,6 +23,11 @@ max_nodes = 25
 # [areas.ordering]
 # description = "Placing and tracking customer orders"
 
+# Source documents for `lore convert`; their facts default to this basis.
+# [[sources]]
+# path = "docs"
+# basis = "intended"
+
 # Extra relation types, beyond the built-in ones.
 # [relations.replaces]
 # label = "replaces"

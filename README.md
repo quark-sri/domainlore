@@ -68,6 +68,7 @@ The full field reference is in [skills/lore-use/page-format.md](skills/lore-use/
 | `lore query "<question>"` | Find the pages that answer a domain question, with their relations |
 | `lore explain <page>` | One page: trust, basis, sources, every relation |
 | `lore path <a> <b>` | How two concepts connect |
+| `lore convert` | Convert the source documents in `lore.toml` to cached text with offsets (`.lore/cache/`); Word needs `domainlore[docx]`, PDF needs `domainlore[pdf]` |
 
 ## What gets generated
 
