@@ -1,0 +1,45 @@
+# An example Proposal: what an agent (lore-extract skill) writes after reading the converted
+# Word BRD and the PDF of the Confluence approval rules. Apply it to a copy of the demo with
+#   lore convert && lore propose proposals/approval-documents.yaml
+# Each cite gives a verbatim quote; `lore propose` finds it and records the exact span.
+title: Approval threshold and four-eyes rule from the BRD and the Confluence rules
+pages:
+  - id: conflicts/approval-threshold-amount
+    type: Spec Conflict
+    title: Approval threshold amount
+    description: The Confluence approval rules say 10 000 EUR, the BRD says 5 000 EUR.
+    about: [approvals/rules/approval-threshold]
+    body: |
+      # Approval threshold amount
+
+      | Source | Value | Date |
+      |---|---|---|
+      | Approval rules (Confluence) v12[^rules] | 10 000 EUR | 2026-06-01 |
+      | Purchase approval BRD v2[^brd] | 5 000 EUR | 2025-03-14 |
+
+      The newer page is not automatically right. **Who can answer:** the product owner for Approvals.
+    cites:
+      rules:
+        doc: docs/approval-rules.pdf
+        quote: Every order with a total above 10 000 EUR needs approval.
+      brd:
+        doc: docs/purchase-approval-brd.docx
+        quote: Every order with a total above 5 000 EUR needs approval before it is processed.
+  - id: approvals/rules/four-eyes
+    type: Rule
+    title: Four-eyes principle
+    description: The Approver of an Order must not be the Buyer who placed it; a Buyer cannot approve their own Order.
+    basis: intended
+    relations:
+      governs: [approvals/entities/approval-request]
+    body: |
+      # Four-eyes principle
+
+      A person cannot approve an [Order](/ordering/entities/order.md) they placed.[^brd][^rules]
+    cites:
+      brd:
+        doc: docs/purchase-approval-brd.docx
+        quote: The approver must not be the buyer who placed the order (four-eyes principle).
+      rules:
+        doc: docs/approval-rules.pdf
+        quote: The approver must not be the buyer who placed the order.

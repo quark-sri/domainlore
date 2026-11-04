@@ -15,6 +15,8 @@ from .config import find_root, load_config
 from .convert import convert as run_convert
 from .graph import Graph
 from .init import init as run_init
+from .propose import ProposalError, load_proposal, slug
+from .propose import propose as run_propose
 from .query import explain as run_explain
 from .query import path as run_path
 from .query import query as run_query
@@ -100,6 +102,29 @@ def convert(root: RootOption = None) -> None:
         typer.echo(f"{outcome:10} {rel}" if " " not in outcome else f"{rel}: {outcome}")
     done = sum(o in ("converted", "updated") for _, o in outcomes)
     typer.echo(f"{done} converted, {len(outcomes) - done} not changed.")
+
+
+@app.command()
+def propose(
+    proposal: Annotated[Path, typer.Argument(help="Proposal YAML file.")],
+    root: RootOption = None,
+    branch: Annotated[
+        str | None, typer.Option(help="Branch to commit on (default: lore/<title>).")
+    ] = None,
+    no_branch: Annotated[
+        bool, typer.Option("--no-branch", help="Write into the working tree, no git.")
+    ] = False,
+) -> None:
+    """Apply a Proposal: check every quote, write the pages, build, check, commit on a branch."""
+    config = config_for(root)
+    try:
+        name = None if no_branch else branch or f"lore/{slug(load_proposal(proposal)['title'])}"
+        typer.echo(run_propose(config, proposal, name), nl=False)
+    except ProposalError as err:
+        typer.echo(f"Proposal not applied: {err}", err=True)
+        raise typer.Exit(1) from err
+    if name:
+        typer.echo(f"\nCommitted on branch `{name}`. Open a pull request with the summary above.")
 
 
 @app.command()

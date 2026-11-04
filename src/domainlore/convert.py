@@ -1,4 +1,4 @@
-"""`lore convert`: turn source documents into cached text with offsets, for exact citations.
+"""`lore convert`: turn source documents into cached text with offsets, so Sources name exact spans.
 
 Each document becomes `.lore/cache/<path>.json` (metadata, sections, pages, the text) and
 `<path>.md` (the same text, for agents to read). Offsets are character positions in that text.
