@@ -69,6 +69,7 @@ The full field reference is in [skills/lore-use/page-format.md](skills/lore-use/
 | `lore explain <page>` | One page: trust, basis, sources, every relation |
 | `lore path <a> <b>` | How two concepts connect |
 | `lore convert` | Convert the source documents in `lore.toml` to cached text with offsets (`.lore/cache/`); Word needs `domainlore[docx]`, PDF needs `domainlore[pdf]` |
+| `lore propose <file>` | Apply a Proposal: check every quote against its document, write the pages with exact source locations, build, check, commit on a new branch (`--no-branch` to skip git) |
 
 ## What gets generated
 
@@ -85,7 +86,7 @@ See the demo product in [examples/order-approval/](examples/order-approval/knowl
 ## Use it from your agent
 
 - **Any agent**: the `AGENTS.md` block from `lore init` points to `knowledge/` and the `lore` commands.
-- **Agent Skills** (Claude Code, Codex, Cursor, Copilot, Gemini CLI and others): [`skills/lore-use`](skills/lore-use/SKILL.md).
+- **Agent Skills** (Claude Code, Codex, Cursor, Copilot, Gemini CLI and others): [`skills/lore-use`](skills/lore-use/SKILL.md) to read and record facts, [`skills/lore-extract`](skills/lore-extract/SKILL.md) to extract them from documents.
 - **Claude Code plugin**:
 
   ```text
