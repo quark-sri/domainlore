@@ -21,6 +21,10 @@ dependencies = [
     "typer>=0.15",
 ]
 
+[project.optional-dependencies]
+docx = ["mammoth>=1.12", "markdownify>=1.1"]
+pdf = ["pypdf>=6"]
+
 [project.urls]
 Homepage = "https://github.com/quark-sri/domainlore"
 
@@ -29,7 +33,12 @@ lore = "domainlore.cli:app"
 
 [dependency-groups]
 dev = [
+    "mammoth>=1.12",
+    "markdownify>=1.1",
+    "pypdf>=6",
     "pytest>=8.3",
+    "python-docx>=1.2",
+    "reportlab>=4",
     "ruff>=0.9",
 ]
 

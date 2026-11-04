@@ -1,6 +1,10 @@
 [knowledge]
 dir = "knowledge"
 
+[[sources]]
+path = "docs"
+basis = "intended"
+
 [diagrams]
 max_nodes = 25
 

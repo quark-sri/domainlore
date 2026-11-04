@@ -39,6 +39,7 @@ class Config:
     areas: dict[str, str] = field(default_factory=dict)
     relations: dict[str, RelationSpec] = field(default_factory=lambda: dict(BUILTIN_RELATIONS))
     max_diagram_nodes: int = 25
+    sources: dict[str, str] = field(default_factory=dict)  # document path -> default basis
 
     @property
     def path(self) -> Path:
@@ -66,6 +67,8 @@ def load_config(root: Path) -> Config:
     config.areas = {
         name: str(area.get("description", "")) for name, area in data.get("areas", {}).items()
     }
+    for source in data.get("sources", []):
+        config.sources[str(source["path"])] = str(source.get("basis", "intended"))
     for name, spec in data.get("relations", {}).items():
         config.relations[name] = RelationSpec(
             name=name,
