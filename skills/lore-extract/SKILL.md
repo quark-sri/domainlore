@@ -5,7 +5,7 @@ description: Extract sourced domain facts from the project's documents (Markdown
 
 # lore-extract
 
-You turn documents into a **Proposal**: new or changed Knowledge Base pages where every fact cites a verbatim quote. `lore propose` checks each quote against the document, writes the exact span and commits the pages on a branch. A person reviews the pull request. You never edit `knowledge/` directly for extracted facts.
+You turn documents into a **Proposal**: new or changed Knowledge Base pages where every fact cites a verbatim quote. `lore propose` checks each quote against the document, writes the exact span and commits the pages on a branch. A person reviews the pull request. Everything you add goes in the Proposal, Open Questions too: never edit `knowledge/` directly, not even after `lore propose`.
 
 ## Steps
 
@@ -16,7 +16,7 @@ You turn documents into a **Proposal**: new or changed Knowledge Base pages wher
    - Two `intended` sources disagree → a `Spec Conflict` page in `knowledge/conflicts/`, citing both.
    - An `intended` source disagrees with an `actual` page (the app or the code) → a `Gap` page, citing both.
    - Record both sides. Never pick a winner.
-   - The documents do not settle a vague value → add an Open Question to `knowledge/questions.md`; do not guess.
+   - The documents do not settle a vague value → an Open Question; do not guess. Put the `questions` page in the Proposal: its existing text plus your items.
 5. Write the Proposal to `.lore/proposals/<short-name>.yaml` (format below). Field names follow [page-format.md](../lore-use/page-format.md).
 6. Run `lore propose .lore/proposals/<short-name>.yaml`. If it reports a quote that is not found, fix the quote, not the document.
 7. Open a pull request from the branch it names, with the summary it prints as the description.
@@ -45,7 +45,18 @@ pages:
         quote: Every order with a total above 5 000 EUR needs approval before it is processed.
 ```
 
-- Every key except `id`, `body` and `cites` is frontmatter. A page in the Proposal replaces the whole page, so copy the fields you keep from the existing page (except `verified` and generated blocks).
+- Every key except `id`, `body` and `cites` is frontmatter. A page with a `body` replaces the whole page, so copy the fields you keep from the existing page (except generated blocks). It removes the page's review (`verified`): use it only when the facts change.
+- To add a document as a Source for facts a page already states, give only `id` and `cites`, and add `after` to each cite: text copied exactly from the page that the quote supports. The footnote goes after that text. The page's body and review stay. Use this for pages a person has reviewed.
+
+  ```yaml
+  - id: approvals/rules/four-eyes
+    cites:
+      brd:
+        doc: docs/purchase-approval-brd.docx
+        quote: The approver must not be the buyer who placed the order (four-eyes principle).
+        after: they placed.
+  ```
+
 - Cite each fact with a footnote `[^label]` in the body; `lore propose` writes the footnote text and the `sources` entry.
 - If a quote appears more than once in a document, add `nth: 2` (1-based) to the cite.
 - Keep non-document sources (a ticket URL) under `sources:` as usual.

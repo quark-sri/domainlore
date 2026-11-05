@@ -65,3 +65,31 @@ Notes on the 2026-11-01 run:
 - Cited 30/31: the PO question cited the PO Term page, not the Order page, as in every run.
 - Conflict-aware 10/11: "Can a buyer approve their own order?" did not mention the threshold Spec Conflict, as in the 2026-10-31 run.
 - One session found that the Order page's Relations list gives the implied four-eyes `governs` link no basis label, while its diagram marks it intended.
+
+## Extraction (manual)
+
+Measures whether an agent turns the demo documents into a correct Proposal with the `lore-extract` skill and finds the planted Spec Conflict without help.
+
+1. `uv run python evals/extract.py <empty dir> --run` copies the demo without the threshold Spec Conflict page, makes the threshold page neutral (no amount), adds only the `lore-extract` and `lore-use` skills, and commits it in a new git repository. It then runs one headless Claude Code session with the prompt "Extract the domain facts from the documents in docs/ into the knowledge base." and writes the transcript next to the folder. Without `--run` it prints the command, for another agent or a manual run; score that run with `--score <transcript>`.
+2. The script scores seven checks: the skill was used; no direct edit to `knowledge/`; a commit on a `lore/` branch; a new Spec Conflict with both amounts (5 000 and 10 000 EUR) that cites the PDF; every document Source has the right hash and its footnote quotes its span; no reviewed page lost its review; `lore check` has no errors. All seven must pass.
+3. The session cannot open a pull request (the copy has no remote), so that step is not scored.
+4. Record the run in the table below.
+
+| Date | Commit | Agent / model | Result | Spans verified | Pages changed | Cost / turns |
+|---|---|---|---|---|---|---|
+| 2026-11-04 | 93138d8 | Claude Code 2.1.316 / claude-opus-5-5 | pass (scored by hand) | 11/11 | 10 | $0.58 / 35 |
+| 2026-11-05 | 16e99d6 + uncommitted fixes, first skill text | Claude Code 2.1.316 / claude-opus-5-5 | fail: direct edit to the questions page | 25/25 | 17 | $0.71 / 24 |
+| 2026-11-05 | 16e99d6 + uncommitted fixes | Claude Code 2.1.316 / claude-opus-5-5 | pass | 24/24 | 19 | $0.65 / 39 |
+
+Notes on the 2026-11-04 run:
+
+- The agent found the Spec Conflict (the BRD and the policy say 5 000 EUR, the PDF says 10 000 EUR), added an escalation Rule and three Open Questions.
+- It did not add the documents as Sources to reviewed pages, because a Proposal page replaced the whole page and removed its review. Since then, a page given with only cites adds Sources and keeps the review.
+- Two defects, fixed since: a page with no cites got an empty `sources` list, and footnotes kept Markdown emphasis from the quote.
+
+Notes on the 2026-11-05 runs:
+
+- Both runs added the documents as Sources to existing pages with the new mode (9 and 10 cites); all five reviewed pages kept their review.
+- In the first run the agent added Open Questions to the questions page with a direct edit after `lore propose`, because the skill said "add an Open Question to `knowledge/questions.md`". The skill now says to put the questions page in the Proposal.
+- Each run had three shell commands denied (loops and `find`, not on the allowed list); the agent used `Read` instead.
+- A single run per skill text is weak evidence: the pages changed (10 to 19) and the cost vary from run to run.
