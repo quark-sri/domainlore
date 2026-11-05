@@ -157,7 +157,106 @@ def test_the_demo_proposal_cites_the_planted_spec_conflict_in_both_documents(tmp
         "rules": "approval-rules.pdf, p. 1",
         "brd": "purchase-approval-brd.docx, Purchase approval BRD > Approval threshold",
     }
+    four_eyes = load_bundle(config.knowledge_dir).concepts["approvals/rules/four-eyes"]
+    assert four_eyes.meta["verified"]["by"] == "human:demo-reviewer"  # sources added, review kept
+    assert [s["id"] for s in four_eyes.meta["sources"]] == ["policy", "brd", "rules"]
     issues = run_check(config)
     assert [i for i in issues if i.level == "error"] == []
     open_conflicts = [i.path for i in issues if i.code == "open-conflict"]
     assert "knowledge/conflicts/approval-threshold-amount.md" in open_conflicts
+
+
+def test_a_page_with_no_cites_gets_no_empty_sources(converted):
+    page = {
+        "id": "questions",
+        "type": "Open Questions",
+        "title": "Open questions",
+        "description": "Ambiguities waiting for a person.",
+        "body": "# Open questions\n\n- Who decides after 3 days?\n",
+    }
+    config = load_config(converted.root)
+    propose(config, proposal(converted, page), branch=None)
+    assert "sources" not in load_bundle(config.knowledge_dir).concepts["questions"].meta
+
+
+def test_footnotes_quote_the_text_without_markdown_emphasis(converted):
+    (converted.root / "docs/policy.md").write_text(POLICY.replace("5 000 EUR", "**5 000 EUR**"))
+    config = load_config(converted.root)
+    convert(config)
+    quote = "Every order with a total above **5 000 EUR** needs approval."
+    page = {**RULE, "cites": {"policy": {"doc": "docs/policy.md", "quote": quote}}}
+    summary = propose(config, proposal(converted, page), branch=None)
+    body = load_bundle(config.knowledge_dir).concepts["shop/rules/threshold"].body
+    assert 'Thresholds: "Every order with a total above 5 000 EUR needs approval."' in body
+    assert "**" not in summary
+
+
+REVIEWED = """---
+type: Rule
+title: Approval threshold
+description: Orders above a total amount need approval.
+basis: intended
+sources:
+  - id: wiki
+    resource: https://wiki.example.com/approvals
+verified: { by: human:reviewer, at: 2026-10-01T09:00:00Z }
+---
+
+# Approval threshold
+
+Orders above 5 000 EUR need approval.[^wiki] Undecided requests escalate.
+
+[^wiki]: Approval wiki
+"""
+
+
+@pytest.fixture
+def reviewed(converted):
+    target = converted.root / "knowledge/shop/rules/threshold.md"
+    target.parent.mkdir(parents=True)
+    target.write_text(REVIEWED)
+    return converted
+
+
+def test_cites_alone_add_sources_and_keep_the_body_and_the_review(reviewed):
+    config = load_config(reviewed.root)
+    cites = {**RULE["cites"]["policy"], "after": "Orders above 5 000 EUR need approval."}
+    page = {"id": "shop/rules/threshold", "cites": {"policy": cites}}
+    summary = propose(config, proposal(reviewed, page), branch=None)
+    concept = load_bundle(config.knowledge_dir).concepts["shop/rules/threshold"]
+    assert concept.meta["verified"] == {"by": "human:reviewer", "at": REVIEWED_AT}
+    assert [s["id"] for s in concept.meta["sources"]] == ["wiki", "policy"]
+    assert "need approval.[^wiki][^policy] Undecided" in concept.body
+    assert "[^wiki]: Approval wiki\n[^policy]: policy.md" in concept.body
+    assert "verified: { by: human:reviewer" in concept.text  # the frontmatter is kept as written
+    assert "sources added: `knowledge/shop/rules/threshold.md`" in summary
+    assert [i for i in run_check(config) if i.level == "error"] == []
+
+
+REVIEWED_AT = yaml.safe_load("at: 2026-10-01T09:00:00Z")["at"]
+
+
+@pytest.mark.parametrize(
+    ("cite", "message"),
+    [
+        ({}, "needs `after`"),
+        ({"after": "Orders below 5 EUR are free."}, "`after` in page"),
+        ({"id": "wiki", "after": "need approval."}, "already has a source `wiki`"),
+    ],
+    ids=["no-after", "after-not-in-page", "label-taken"],
+)
+def test_adding_sources_needs_a_place_in_the_page_and_a_new_label(reviewed, cite, message):
+    label = cite.pop("id", "policy")
+    page = {"id": "shop/rules/threshold", "cites": {label: {**RULE["cites"]["policy"], **cite}}}
+    with pytest.raises(ProposalError, match=message):
+        propose(load_config(reviewed.root), proposal(reviewed, page), branch=None)
+    assert (reviewed.root / "knowledge/shop/rules/threshold.md").read_text() == REVIEWED
+
+
+def test_a_proposal_that_replaces_a_reviewed_page_removes_the_review(reviewed):
+    config = load_config(reviewed.root)
+    page = {**RULE, "verified": {"by": "human:someone", "at": "2026-11-01T00:00:00Z"}}
+    summary = propose(config, proposal(reviewed, page), branch=None)
+    concept = load_bundle(config.knowledge_dir).concepts["shop/rules/threshold"]
+    assert "verified" not in concept.meta
+    assert "changed, review removed: `knowledge/shop/rules/threshold.md`" in summary

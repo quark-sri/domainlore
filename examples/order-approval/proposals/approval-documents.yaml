@@ -25,21 +25,14 @@ pages:
       brd:
         doc: docs/purchase-approval-brd.docx
         quote: Every order with a total above 5 000 EUR needs approval before it is processed.
+  # The four-eyes page is human-reviewed: add the two documents as Sources and keep the review.
   - id: approvals/rules/four-eyes
-    type: Rule
-    title: Four-eyes principle
-    description: The Approver of an Order must not be the Buyer who placed it; a Buyer cannot approve their own Order.
-    basis: intended
-    relations:
-      governs: [approvals/entities/approval-request]
-    body: |
-      # Four-eyes principle
-
-      A person cannot approve an [Order](/ordering/entities/order.md) they placed.[^brd][^rules]
     cites:
       brd:
         doc: docs/purchase-approval-brd.docx
         quote: The approver must not be the buyer who placed the order (four-eyes principle).
+        after: they placed.
       rules:
         doc: docs/approval-rules.pdf
         quote: The approver must not be the buyer who placed the order.
+        after: they placed.

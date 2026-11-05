@@ -16,6 +16,10 @@ A Proposal is YAML written by an agent (or a person) after reading converted doc
 Every key of a page except `id`, `body` and `cites` is frontmatter. Each cite names a converted
 document and a verbatim quote; `lore propose` finds the quote and records its exact span
 (ADR 0003). The agent never computes offsets.
+
+A page with a `body` replaces the page; it is unverified until a person reviews it again. A page
+with only `id` and `cites` adds Sources to an existing page and keeps its body and review: each
+cite then gives `after`, the page text the quote supports, and the footnote goes after it.
 """
 
 from __future__ import annotations
@@ -23,6 +27,7 @@ from __future__ import annotations
 import hashlib
 import re
 import subprocess
+import textwrap
 from dataclasses import dataclass
 from os.path import relpath
 from pathlib import Path
@@ -30,11 +35,13 @@ from pathlib import Path
 import yaml
 
 from .build import build
+from .bundle import split_frontmatter
 from .check import run_check
 from .config import Config
 from .convert import Document, documents, load
 
-FRONT_ORDER = ("type", "title", "description", "aliases", "basis", "about", "verified")
+FRONT_ORDER = ("type", "title", "description", "aliases", "basis", "about")
+GENERATED = "<!-- generated:start "
 
 
 class ProposalError(Exception):
@@ -62,8 +69,13 @@ class Quote:
             "basis": self.doc.basis,
         }
 
+    @property
+    def plain(self) -> str:
+        """The quote without Markdown emphasis, for footnotes and the summary."""
+        return re.sub(r"[*`]|__", "", self.quote)
+
     def footnote(self, config: Config) -> str:
-        return f'[^{self.id}]: {self.source(config)["title"]}: "{self.quote}"'
+        return f'[^{self.id}]: {self.source(config)["title"]}: "{self.plain}"'
 
 
 def find(text: str, quote: str, nth: int | None = None) -> tuple[int, int]:
@@ -99,22 +111,99 @@ def cite(config: Config, cid: str, spec: dict) -> Quote:
     return Quote(cid, doc, start, end, quote)
 
 
-def render(config: Config, page: dict) -> tuple[Path, str, list[Quote]]:
+def dump(data: object) -> str:
+    return yaml.safe_dump(data, sort_keys=False, allow_unicode=True, width=1000)
+
+
+def with_notes(body: str, notes: list[str]) -> str:
+    """Append footnote definitions, after the existing ones if the body ends with them."""
+    body = body.rstrip() + "\n"
+    if not notes:
+        return body
+    gap = "" if body.splitlines()[-1].startswith("[^") else "\n"
+    return body + gap + "\n".join(notes) + "\n"
+
+
+def append_sources(front: str, meta: dict, new: list[dict]) -> str:
+    """Add Source entries to the frontmatter text and keep the rest as written."""
+    entries = textwrap.indent(dump(new), "  ")
+    lines = front.splitlines(keepends=True)
+    result = ""
+    if "sources:\n" in lines:
+        i = lines.index("sources:\n") + 1
+        while i < len(lines) and lines[i].startswith((" ", "-")):
+            i += 1
+        result = "".join(lines[:i]) + entries + "".join(lines[i:])
+    elif not any(line.startswith("sources:") for line in lines):
+        result = front + "sources:\n" + entries
+    want = (meta.get("sources") or []) + new
+    if result and (yaml.safe_load(result) or {}).get("sources") == want:
+        return result
+    return dump({**meta, "sources": want})  # unusual layout: write the frontmatter again
+
+
+def add_sources(config: Config, pid: str, page: dict, target: Path) -> tuple[str, list[Quote]]:
+    """Cite new quotes on an existing page; its body and review stay as they are."""
+    meta, body, error = split_frontmatter(target.read_text(encoding="utf-8"))
+    if meta is None:
+        raise ProposalError(f"page `{pid}`: {error}")
+    known = {s.get("id") for s in meta.get("sources") or [] if isinstance(s, dict)}
+    own, generated = (body.split(GENERATED, 1) + [""])[:2]
+    quotes = []
+    for cid, spec in (page.get("cites") or {}).items():
+        if cid in known:
+            raise ProposalError(f"cite {cid}: page `{pid}` already has a source `{cid}`")
+        after = " ".join(str(spec.get("after", "")).split())
+        if not after:
+            raise ProposalError(
+                f"cite {cid}: page `{pid}` has no `body` in the Proposal, so the cite needs "
+                "`after`: the page text the quote supports"
+            )
+        quote = cite(config, cid, spec)
+        try:
+            _, end = find(own, after)
+        except ProposalError as err:
+            raise ProposalError(f"cite {cid}: `after` in page `{pid}`: {err}") from err
+        end += re.match(r"(\[\^[^\]\s]+\])*", own[end:]).end()  # after any footnotes there
+        own = f"{own[:end]}[^{cid}]{own[end:]}"
+        quotes.append(quote)
+    own = with_notes(own, [q.footnote(config) for q in quotes])
+    if generated:
+        own += "\n" + GENERATED + generated
+    front = append_sources(
+        target.read_text("utf-8").split("\n---", 1)[0][4:] + "\n",
+        meta,
+        [q.source(config) for q in quotes],
+    )
+    return f"---\n{front}---\n{own}", quotes
+
+
+def render(config: Config, page: dict) -> tuple[Path, str, list[Quote], str]:
+    """The page file, its new text, its quotes and what changes (for the summary)."""
     pid = str(page.get("id", "")).strip("/")
     if not pid or ".." in pid.split("/"):
         raise ProposalError(f"page id `{pid}` is not a concept ID such as `area/rules/name`")
+    target = config.knowledge_dir / f"{pid}.md"
+    if "body" not in page and set(page) <= {"id", "cites"}:
+        if not target.is_file():
+            raise ProposalError(f"page `{pid}` does not exist; a new page needs a `body`")
+        text, quotes = add_sources(config, pid, page, target)
+        return target, text, quotes, "sources added"
     quotes = [cite(config, cid, spec) for cid, spec in (page.get("cites") or {}).items()]
-    meta = {k: v for k, v in page.items() if k not in ("id", "body", "cites")}
+    meta = {k: v for k, v in page.items() if k not in ("id", "body", "cites", "verified")}
     sources = [s for s in meta.pop("sources", []) or [] if s.get("id") not in page.get("cites", {})]
-    meta["sources"] = sources + [c.source(config) for c in quotes]
+    sources += [c.source(config) for c in quotes]
+    if sources:
+        meta["sources"] = sources
     ordered = {k: meta.pop(k) for k in FRONT_ORDER if k in meta}
     ordered.update(meta)
-    body = str(page.get("body", "")).rstrip() + "\n"
-    notes = [c.footnote(config) for c in quotes if f"[^{c.id}]:" not in body]
-    if notes:
-        body += "\n" + "\n".join(notes) + "\n"
-    front = yaml.safe_dump(ordered, sort_keys=False, allow_unicode=True, width=1000)
-    return config.knowledge_dir / f"{pid}.md", f"---\n{front}---\n\n{body.lstrip()}", quotes
+    body = str(page.get("body", ""))
+    body = with_notes(body, [c.footnote(config) for c in quotes if f"[^{c.id}]:" not in body])
+    kind = "new"
+    if target.is_file():
+        old, _, _ = split_frontmatter(target.read_text(encoding="utf-8"))
+        kind = "changed, review removed" if old and old.get("verified") else "changed"
+    return target, f"---\n{dump(ordered)}---\n\n{body.lstrip()}", quotes, kind
 
 
 def load_proposal(path: Path) -> dict:
@@ -138,17 +227,15 @@ def git(config: Config, *args: str) -> str:
     return done.stdout
 
 
-def summary(config: Config, title: str, written: list[tuple[Path, bool, list[Quote]]]) -> str:
+def summary(config: Config, title: str, written: list[tuple[Path, str, list[Quote]]]) -> str:
     lines = [f"# Proposal: {title}", "", "Pages:"]
-    for path, new, _ in written:
-        lines.append(
-            f"- {'new' if new else 'changed'}: `{path.relative_to(config.root).as_posix()}`"
-        )
+    for path, kind, _ in written:
+        lines.append(f"- {kind}: `{path.relative_to(config.root).as_posix()}`")
     lines += ["", "Sources (exact spans, each quote checked against its document):"]
     for _, _, quotes in written:
         for c in quotes:
             lines.append(
-                f'- `{c.source(config)["resource"]}` {c.source(config)["title"]}: "{c.quote}"'
+                f'- `{c.source(config)["resource"]}` {c.source(config)["title"]}: "{c.plain}"'
             )
     lines += ["", "Review each fact against its quote. Merging marks these facts as reviewed."]
     return "\n".join(lines) + "\n"
@@ -167,8 +254,8 @@ def propose(config: Config, path: Path, branch: str | None) -> str:
         target: target.read_text("utf-8") if target.exists() else None for target, *_ in rendered
     }
     written = []
-    for target, text, quotes in rendered:
-        written.append((target, before[target] is None, quotes))
+    for target, text, quotes, kind in rendered:
+        written.append((target, kind, quotes))
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(text, encoding="utf-8")
     build(config)
