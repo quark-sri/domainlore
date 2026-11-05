@@ -70,16 +70,22 @@ Notes on the 2026-11-01 run:
 
 Measures whether an agent turns the demo documents into a correct Proposal with the `lore-extract` skill and finds the planted Spec Conflict without help.
 
-1. `uv run python evals/extract.py <empty dir> --run` copies the demo without the threshold Spec Conflict page, makes the threshold page neutral (no amount), adds only the `lore-extract` and `lore-use` skills, and commits it in a new git repository. It then runs one headless Claude Code session with the prompt "Extract the domain facts from the documents in docs/ into the knowledge base." and writes the transcript next to the folder. Without `--run` it prints the command, for another agent or a manual run; score that run with `--score <transcript>`.
-2. The script scores seven checks: the skill was used; no direct edit to `knowledge/`; a commit on a `lore/` branch; a new Spec Conflict with both amounts (5 000 and 10 000 EUR) that cites the PDF; every document Source has the right hash and its footnote quotes its span; no reviewed page lost its review; `lore check` has no errors. All seven must pass.
+1. `uv run python evals/extract.py <empty dir> --run` makes a copy of the demo (`--runs N` for N copies). Each copy has no threshold Spec Conflict page, a neutral threshold page (no amount), and only the `lore-extract` and `lore-use` skills, committed in a new git repository. The script runs one headless Claude Code session in each copy (model `claude-opus-5-5`, at most 3 USD and 30 minutes each; it prints the maximum cost first) with the prompt "Extract the domain facts from the documents in docs/ into the knowledge base." and writes each transcript next to its copy. The agent may write only in `.lore/proposals/`.
+2. The script scores seven checks for each run: the `lore-extract` skill was used; the agent wrote files only in `.lore/proposals/` (no `Edit` or `Write` elsewhere; a pattern scan for shell writes to `knowledge/`); `knowledge/` changed only through Proposal commits on a `lore/` branch, with nothing left uncommitted; a new Spec Conflict has both amounts (5 000 and 10 000 EUR) and cites the PDF; every document Source has the right hash and its footnote quotes its span; no reviewed page lost its review or was deleted; `lore check` has no errors. A run passes when all seven pass. It also prints the repository commit, the hash of the skill text the agent used, and the cost.
 3. The session cannot open a pull request (the copy has no remote), so that step is not scored.
-4. Record the run in the table below.
+4. When to run it. The unit tests cover the code and the scoring for free; an agent run is needed only to see how an agent follows the skill text:
+   - A wording change to the skill, or a change to `lore propose` or the eval: no run.
+   - A skill change that alters what the agent must do: 1 run before the merge.
+   - Before a release tag: `--runs 3` on the final skill text; at least 2 must pass, with the failure reasons noted. The script exits 0 at 1 of 1 or 2 of 3.
+   
+   Record each run in the table below, with the commit and skill hash that the script prints. The transcripts are not kept in the repository.
+5. Other agents: without `--run`, the script sets up one copy and prints the Claude Code command. The first two checks read Claude Code tool calls; the other five read only the copy's git and file state, so they apply to any agent. `uv run python evals/extract.py <copy> --score <transcript>` scores a finished run. `tests/test_eval_extract.py` tests the set-up and each check without an agent.
 
 | Date | Commit | Agent / model | Result | Spans verified | Pages changed | Cost / turns |
 |---|---|---|---|---|---|---|
-| 2026-11-04 | 93138d8 | Claude Code 2.1.316 / claude-opus-5-5 | pass (scored by hand) | 11/11 | 10 | $0.58 / 35 |
-| 2026-11-05 | 16e99d6 + uncommitted fixes, first skill text | Claude Code 2.1.316 / claude-opus-5-5 | fail: direct edit to the questions page | 25/25 | 17 | $0.71 / 24 |
-| 2026-11-05 | 16e99d6 + uncommitted fixes | Claude Code 2.1.316 / claude-opus-5-5 | pass | 24/24 | 19 | $0.65 / 39 |
+| 2026-11-04 | 93138d8 | Claude Code 2.1.316 / claude-opus-5-5 | pass (scored by hand, before the script) | 11/11 | 10 | $0.58 / 35 |
+| 2026-11-05 | before 4bc2bad: earlier skill text (sha256:93b988acc532) | Claude Code 2.1.316 / claude-opus-5-5 | fail: direct edit to the questions page | 25/25 | 17 | $0.71 / 24 |
+| 2026-11-05 | 4bc2bad skill text (sha256:b67acea38e58) and `lore propose` | Claude Code 2.1.316 / claude-opus-5-5 | pass | 24/24 | 19 | $0.65 / 39 |
 
 Notes on the 2026-11-04 run:
 
@@ -93,3 +99,4 @@ Notes on the 2026-11-05 runs:
 - In the first run the agent added Open Questions to the questions page with a direct edit after `lore propose`, because the skill said "add an Open Question to `knowledge/questions.md`". The skill now says to put the questions page in the Proposal.
 - Each run had three shell commands denied (loops and `find`, not on the allowed list); the agent used `Read` instead.
 - A single run per skill text is weak evidence: the pages changed (10 to 19) and the cost vary from run to run.
+- Both runs were scored again with the stricter checks (writes only in `.lore/proposals/`, only Proposal commits): the results did not change. The second run used the skill text committed in 4bc2bad; one sentence was added to the `lore-use` page format reference after it.

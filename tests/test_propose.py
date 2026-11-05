@@ -1,16 +1,17 @@
 from __future__ import annotations
 
+import re
 import shutil
 import subprocess
 
 import pytest
 import yaml
 
-from domainlore.bundle import load_bundle
+from domainlore.bundle import load_bundle, split_frontmatter
 from domainlore.check import run_check
 from domainlore.config import load_config
 from domainlore.convert import convert, load
-from domainlore.propose import ProposalError, find, propose
+from domainlore.propose import ProposalError, find, propose, render
 from tests.conftest import EXAMPLE
 
 POLICY = """# Purchase policy
@@ -150,7 +151,9 @@ def test_the_demo_proposal_cites_the_planted_spec_conflict_in_both_documents(tmp
     shutil.copytree(EXAMPLE, root, ignore=shutil.ignore_patterns(".lore"))
     config = load_config(root)
     convert(config)
-    propose(config, root / "proposals" / "approval-documents.yaml", branch=None)
+    summary = propose(config, root / "proposals" / "approval-documents.yaml", branch=None)
+    assert "New and changed pages are unverified" in summary  # a new conflict page
+    assert "keep their review" in summary  # four-eyes: sources added
     conflict = load_bundle(config.knowledge_dir).concepts["conflicts/approval-threshold-amount"]
     titles = {s["id"]: s["title"] for s in conflict.meta["sources"]}
     assert titles == {
@@ -208,6 +211,7 @@ Orders above 5 000 EUR need approval.[^wiki] Undecided requests escalate.
 
 [^wiki]: Approval wiki
 """
+REVIEWED_AT = yaml.safe_load("at: 2026-10-01T09:00:00Z")["at"]
 
 
 @pytest.fixture
@@ -230,20 +234,21 @@ def test_cites_alone_add_sources_and_keep_the_body_and_the_review(reviewed):
     assert "[^wiki]: Approval wiki\n[^policy]: policy.md" in concept.body
     assert "verified: { by: human:reviewer" in concept.text  # the frontmatter is kept as written
     assert "sources added: `knowledge/shop/rules/threshold.md`" in summary
+    assert "keep their review: check that each new quote supports" in summary
+    assert "New and changed pages are unverified" not in summary
     assert [i for i in run_check(config) if i.level == "error"] == []
-
-
-REVIEWED_AT = yaml.safe_load("at: 2026-10-01T09:00:00Z")["at"]
 
 
 @pytest.mark.parametrize(
     ("cite", "message"),
     [
         ({}, "needs `after`"),
-        ({"after": "Orders below 5 EUR are free."}, "`after` in page"),
+        ({"after": "Orders below 5 EUR are free."}, "`after` is not in the page text"),
+        ({"after": "Approval wiki"}, "`after` is not in the page text"),  # only in a footnote
+        ({"after": "need approva"}, "`after` is not in the page text"),  # not a whole word
         ({"id": "wiki", "after": "need approval."}, "already has a source `wiki`"),
     ],
-    ids=["no-after", "after-not-in-page", "label-taken"],
+    ids=["no-after", "after-not-in-page", "after-only-in-footnotes", "part-word", "label-taken"],
 )
 def test_adding_sources_needs_a_place_in_the_page_and_a_new_label(reviewed, cite, message):
     label = cite.pop("id", "policy")
@@ -259,4 +264,108 @@ def test_a_proposal_that_replaces_a_reviewed_page_removes_the_review(reviewed):
     summary = propose(config, proposal(reviewed, page), branch=None)
     concept = load_bundle(config.knowledge_dir).concepts["shop/rules/threshold"]
     assert "verified" not in concept.meta
-    assert "changed, review removed: `knowledge/shop/rules/threshold.md`" in summary
+    assert "changed, review removed, `verified` in the Proposal ignored: `knowledge/" in summary
+    assert "New and changed pages are unverified" in summary
+
+
+def test_verified_in_a_proposal_is_ignored_on_a_new_page(converted):
+    config = load_config(converted.root)
+    page = {**RULE, "verified": {"by": "human:someone", "at": "2026-11-01T00:00:00Z"}}
+    summary = propose(config, proposal(converted, page), branch=None)
+    assert "verified" not in load_bundle(config.knowledge_dir).concepts["shop/rules/threshold"].meta
+    assert "new, `verified` in the Proposal ignored: `knowledge/shop/rules/threshold.md`" in summary
+
+
+def test_after_that_appears_twice_is_refused(reviewed):
+    target = reviewed.root / "knowledge/shop/rules/threshold.md"
+    twice = REVIEWED.replace("requests escalate.", "requests escalate. Orders need approval.")
+    target.write_text(twice)
+    cites = {**RULE["cites"]["policy"], "after": "need approval."}
+    page = {"id": "shop/rules/threshold", "cites": {"policy": cites}}
+    with pytest.raises(ProposalError, match="`after` appears 2 times; make it longer"):
+        propose(load_config(reviewed.root), proposal(reviewed, page), branch=None)
+    assert target.read_text() == twice
+
+
+@pytest.mark.parametrize(
+    "extra",
+    [{"description": "New text."}, {"cites": {}}, {"cites": None}],
+    ids=["other-field", "no-cites", "empty-cites"],
+)
+def test_a_page_without_a_body_needs_only_id_and_cites(reviewed, extra):
+    cites = {**RULE["cites"]["policy"], "after": "need approval."}
+    page = {"id": "shop/rules/threshold", "cites": {"policy": cites}, **extra}
+    if extra.get("cites", 1) is None:
+        del page["cites"]
+    with pytest.raises(ProposalError, match="give a `body` to write the page, or only `id`"):
+        propose(load_config(reviewed.root), proposal(reviewed, page), branch=None)
+    assert (reviewed.root / "knowledge/shop/rules/threshold.md").read_text() == REVIEWED
+
+
+def test_cites_alone_need_an_existing_page(converted):
+    cites = {**RULE["cites"]["policy"], "after": "need approval."}
+    page = {"id": "shop/rules/missing", "cites": {"policy": cites}}
+    with pytest.raises(ProposalError, match="does not exist; a new page needs a `body`"):
+        propose(load_config(converted.root), proposal(converted, page), branch=None)
+
+
+WIKI = "sources:\n  - id: wiki\n    resource: https://wiki.example.com/approvals\n"
+NO_WIKI = (
+    REVIEWED.replace(WIKI, "").replace(".[^wiki]", ".").replace("\n[^wiki]: Approval wiki\n", "")
+)
+GENERATED = (
+    "\n<!-- generated:start relations -->\n## Relations\n\n- x\n<!-- generated:end relations -->\n"
+)
+
+
+def without_policy(body: str) -> str:
+    """The body with the added footnote removed, blank lines collapsed."""
+    kept = [line for line in body.splitlines() if not line.startswith("[^policy]:")]
+    body = "\n".join(kept).replace("[^policy]", "")
+    return re.sub(r"\n{3,}", "\n\n", body).strip()
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        NO_WIKI,
+        NO_WIKI.replace("basis: intended\n", "basis: intended\nsources: []\n"),
+        REVIEWED.replace(
+            WIKI, "sources: [{id: wiki, resource: 'https://wiki.example.com/approvals'}]\n"
+        ),
+        REVIEWED + GENERATED,
+    ],
+    ids=["no-sources-key", "empty-flow-list", "flow-list", "generated-block"],
+)
+def test_adding_sources_keeps_the_review_and_the_text_in_any_layout(reviewed, text):
+    target = reviewed.root / "knowledge/shop/rules/threshold.md"
+    target.write_text(text)
+    config = load_config(reviewed.root)
+    cites = {**RULE["cites"]["policy"], "after": "need approval."}
+    page = {"id": "shop/rules/threshold", "cites": {"policy": cites}}
+    _, new, _, kind = render(config, page)
+    meta, body, _ = split_frontmatter(new)
+    old_meta, old_body, _ = split_frontmatter(text)
+    assert kind == "sources added"
+    assert meta["verified"] == old_meta["verified"]
+    added = meta["sources"][-1]
+    assert added["id"] == "policy" and added["resource"].startswith("../docs/policy.md#char=")
+    assert meta == {**old_meta, "sources": (old_meta.get("sources") or []) + [added]}
+    assert "need approval.[^policy]" in body or "need approval.[^wiki][^policy]" in body
+    assert without_policy(body) == without_policy(old_body)
+    if GENERATED in text:  # footnotes stay above the generated block
+        assert body.index("[^policy]: ") < body.index("<!-- generated:start relations -->")
+    propose(config, proposal(reviewed, page), branch=None)
+    assert [i for i in run_check(config) if i.level == "error"] == []
+
+
+def test_two_cites_after_the_same_text_keep_their_order(reviewed):
+    escalation = {"doc": "docs/policy.md", "quote": "Undecided requests go to the finance lead."}
+    cites = {
+        "policy": {**RULE["cites"]["policy"], "after": "need approval."},
+        "esc": {**escalation, "nth": 1, "after": "need approval."},
+    }
+    config = load_config(reviewed.root)
+    propose(config, proposal(reviewed, {"id": "shop/rules/threshold", "cites": cites}), branch=None)
+    body = load_bundle(config.knowledge_dir).concepts["shop/rules/threshold"].body
+    assert "need approval.[^wiki][^policy][^esc] Undecided" in body
