@@ -36,7 +36,7 @@ Sub-folder names inside an Area are a convention; the `type` field is what count
 
 Cite a source in the body with a footnote whose label is the source `id`: `…needs approval.[^policy]` and `[^policy]: Purchase approval policy v2`.
 
-A source written by `lore propose` from a converted document has an exact location ([ADR 0003](https://github.com/quark-sri/domainlore/blob/main/docs/adr/0003-document-sources-as-text-fragments.md)): `resource` is the document path plus `#char=<start>,<end>` (offsets into the text from `lore convert`), `version` is `sha256:<hash>` of the file, `title` names the section or PDF page, and the footnote quotes the cited text verbatim, without Markdown emphasis. To add a document Source to an existing page without changing its facts, a Proposal gives the page only `id` and `cites`, each with `after` (see the `lore-extract` skill); the page keeps its review.
+A source written by `lore propose` from a converted document has an exact location ([ADR 0003](https://github.com/quark-sri/domainlore/blob/main/docs/adr/0003-document-sources-as-text-fragments.md)): `resource` is the document path plus `#char=<start>,<end>` (offsets into the text from `lore convert`), `version` is `sha256:<hash>` of the file, `title` names the section or PDF page, and the footnote quotes the cited text with the Markdown emphasis characters (`*`, `` ` ``, `__`) removed. To add a document Source to an existing page without changing its facts, a Proposal gives the page only `id` and `cites`, each with `after` (see the `lore-extract` skill); the page keeps its review.
 
 ## Relations
 

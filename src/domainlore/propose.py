@@ -17,9 +17,10 @@ Every key of a page except `id`, `body` and `cites` is frontmatter. Each cite na
 document and a verbatim quote; `lore propose` finds the quote and records its exact span
 (ADR 0003). The agent never computes offsets.
 
-A page with a `body` replaces the page; it is unverified until a person reviews it again. A page
-with only `id` and `cites` adds Sources to an existing page and keeps its body and review: each
-cite then gives `after`, the page text the quote supports, and the footnote goes after it.
+A page with a `body` replaces the page; it is unverified until a person reviews it again, and a
+`verified` key in the Proposal is ignored. A page with only `id` and `cites` adds Sources to an
+existing page and keeps its body and review: each cite then gives `after`, the page text the quote
+supports, and the footnote goes after it. Any other page without a `body` is an error.
 """
 
 from __future__ import annotations
@@ -160,10 +161,17 @@ def add_sources(config: Config, pid: str, page: dict, target: Path) -> tuple[str
                 "`after`: the page text the quote supports"
             )
         quote = cite(config, cid, spec)
-        try:
-            _, end = find(own, after)
-        except ProposalError as err:
-            raise ProposalError(f"cite {cid}: `after` in page `{pid}`: {err}") from err
+        notes = re.search(r"(?m)^\[\^[^\]\s]+\]:", own)  # search the text, not the footnotes
+        pattern = r"(?<!\w)" + r"\s+".join(re.escape(word) for word in after.split()) + r"(?!\w)"
+        found = [m.end() for m in re.finditer(pattern, own[: notes.start() if notes else None])]
+        if len(found) != 1:
+            problem = (
+                f"appears {len(found)} times; make it longer until it is unique"
+                if found
+                else "is not in the page text; copy it exactly"
+            )
+            raise ProposalError(f"cite {cid}: `after` {problem} (page `{pid}`): {after!r}")
+        end = found[0]
         end += re.match(r"(\[\^[^\]\s]+\])*", own[end:]).end()  # after any footnotes there
         own = f"{own[:end]}[^{cid}]{own[end:]}"
         quotes.append(quote)
@@ -184,7 +192,12 @@ def render(config: Config, page: dict) -> tuple[Path, str, list[Quote], str]:
     if not pid or ".." in pid.split("/"):
         raise ProposalError(f"page id `{pid}` is not a concept ID such as `area/rules/name`")
     target = config.knowledge_dir / f"{pid}.md"
-    if "body" not in page and set(page) <= {"id", "cites"}:
+    if "body" not in page:
+        if not set(page) <= {"id", "cites"} or not page.get("cites"):
+            raise ProposalError(
+                f"page `{pid}` has no `body`: give a `body` to write the page, "
+                "or only `id` and `cites` (with at least one cite) to add Sources to it"
+            )
         if not target.is_file():
             raise ProposalError(f"page `{pid}` does not exist; a new page needs a `body`")
         text, quotes = add_sources(config, pid, page, target)
@@ -203,6 +216,8 @@ def render(config: Config, page: dict) -> tuple[Path, str, list[Quote], str]:
     if target.is_file():
         old, _, _ = split_frontmatter(target.read_text(encoding="utf-8"))
         kind = "changed, review removed" if old and old.get("verified") else "changed"
+    if "verified" in page:
+        kind += ", `verified` in the Proposal ignored"
     return target, f"---\n{dump(ordered)}---\n\n{body.lstrip()}", quotes, kind
 
 
@@ -237,7 +252,15 @@ def summary(config: Config, title: str, written: list[tuple[Path, str, list[Quot
             lines.append(
                 f'- `{c.source(config)["resource"]}` {c.source(config)["title"]}: "{c.plain}"'
             )
-    lines += ["", "Review each fact against its quote. Merging marks these facts as reviewed."]
+    kinds = {kind for _, kind, _ in written}
+    lines.append("")
+    if kinds - {"sources added"}:
+        lines.append("New and changed pages are unverified: review each fact against its quote.")
+    if "sources added" in kinds:
+        lines.append(
+            "Pages with sources added keep their review: "
+            "check that each new quote supports the text before its footnote."
+        )
     return "\n".join(lines) + "\n"
 
 
