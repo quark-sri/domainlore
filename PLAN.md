@@ -335,7 +335,7 @@ The `query` / `path` / `explain` commands mirror graphify's interface because ag
 7. ✅ **`query` / `path` / `explain`** (keyword + type hints; retrieval eval hit@5 93%).
 8. ✅ **`init`** (lore.toml, AGENTS.md / CLAUDE.md block, Cursor rule) and the `lore-use` skill + Claude Code plugin.
 9. ✅ **Manual agent eval** (`evals/README.md`: 30/30 correct) and **tag v0.1.0**.
-10. ⏳ **v0.2a** per section 13: ✅ `lore convert` (md, docx, pdf), demo Word BRD and PDF rules; ✅ the Proposal file, `lore propose` and the `lore-extract` skill (ADR 0003); ✅ Sources added to a page keep its review, a rewritten page loses it; ✅ agent extraction test (`evals/extract.py`, results in `evals/README.md`; a run on the current skill text is pending); next: the `lore-resolve` and `lore-review` skills.
+10. ⏳ **v0.2a** per section 13: ✅ `lore convert` (md, docx, pdf), demo Word BRD and PDF rules; ✅ the Proposal file, `lore propose` and the `lore-extract` skill (ADR 0003); ✅ Sources added to a page keep its review, a rewritten page loses it; ✅ agent extraction test (`evals/extract.py`, results in `evals/README.md`); next: the `lore-resolve` and `lore-review` skills.
 
 ## 15. Prior art and how we use it
 

@@ -86,6 +86,7 @@ Measures whether an agent turns the demo documents into a correct Proposal with 
 | 2026-11-04 | 93138d8 | Claude Code 2.1.316 / claude-opus-5-5 | pass (scored by hand, before the script) | 11/11 | 10 | $0.58 / 35 |
 | 2026-11-05 | before 4bc2bad: earlier skill text (sha256:93b988acc532) | Claude Code 2.1.316 / claude-opus-5-5 | fail: direct edit to the questions page | 25/25 | 17 | $0.71 / 24 |
 | 2026-11-05 | 4bc2bad skill text (sha256:b67acea38e58) and `lore propose` | Claude Code 2.1.316 / claude-opus-5-5 | pass | 24/24 | 19 | $0.65 / 39 |
+| 2026-11-05 | 1cd3a38 skill text (sha256:c941ff6d1f67); the script had an uncommitted `--model` option | Claude Code 2.1.316 / claude-sonnet-5-5 | pass (1 run, 7 of 7 checks) | 7/7 | 6 | $0.15 / 13 |
 
 Notes on the 2026-11-04 run:
 
@@ -100,3 +101,10 @@ Notes on the 2026-11-05 runs:
 - Each run had three shell commands denied (loops and `find`, not on the allowed list); the agent used `Read` instead.
 - A single run per skill text is weak evidence: the pages changed (10 to 19) and the cost vary from run to run.
 - Both runs were scored again with the stricter checks (writes only in `.lore/proposals/`, only Proposal commits): the results did not change. The second run used the skill text committed in 4bc2bad; one sentence was added to the `lore-use` page format reference after it.
+
+Notes on the 2026-11-05 Sonnet run (first run on the current skill text, after PR 10):
+
+- Run with `uv run python evals/extract.py <dir> --run --model claude-sonnet-5-5`. The `--model` option was added for this run; the default stays `claude-opus-5-5`, so earlier rows stay comparable.
+- The agent used the sources-only mode on three existing pages (two were reviewed and kept their review) and wrote the Spec Conflict with both amounts and both documents cited. It wrote only in `.lore/proposals/`.
+- It did less than the Opus runs: it added no escalation rule and no Open Questions (6 pages changed, against 17 to 19). The seven checks do not require them, so this run did not exercise the Open Questions step that PR 10 rewrote. A run that covers that step needs an Open Question case in the scored scenario (in `TASKS.local.md`).
+- One run on one model: weak evidence, as before.
