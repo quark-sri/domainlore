@@ -95,21 +95,21 @@ def setup(root: Path) -> None:
     sh(root, "git", "commit", "-q", "-m", "Demo Knowledge Base")
 
 
-def command() -> list[str]:
+def command(model: str = MODEL) -> list[str]:
     return [
-        *("claude", "-p", PROMPT, "--model", MODEL, "--max-budget-usd", str(BUDGET_USD)),
+        *("claude", "-p", PROMPT, "--model", model, "--max-budget-usd", str(BUDGET_USD)),
         *("--setting-sources", "project,local", "--output-format", "stream-json", "--verbose"),
         *("--allowedTools", *TOOLS),
         *("--disallowedTools", "WebFetch", "WebSearch", "Agent", "Bash(gh:*)"),
     ]
 
 
-def run(root: Path, transcript: Path) -> None:
+def run(root: Path, transcript: Path, model: str = MODEL) -> None:
     env = {**os.environ, "PATH": f"{Path(lore_bin()).parent}{os.pathsep}{os.environ['PATH']}"}
     with transcript.open("w") as out:
         try:
             subprocess.run(
-                command(),
+                command(model),
                 cwd=root,
                 env=env,
                 stdin=subprocess.DEVNULL,
@@ -248,6 +248,8 @@ def score(root: Path, transcript: Path) -> bool:
     _, result = tool_uses(transcript)
     skill = root / ".claude" / "skills" / "lore-extract" / "SKILL.md"
     commit = sh(REPO, "git", "rev-parse", "--short", "HEAD").strip()
+    events = [json.loads(line) for line in transcript.read_text().splitlines() if line.strip()]
+    model = next((e.get("model") for e in events if e.get("type") == "system"), None) or "unknown"
     status = ("status", "--porcelain", "--untracked-files=no", "--", "skills", "src", "evals")
     dirty = " (uncommitted changes)" if sh(REPO, "git", *status) else ""
     for name, ok in rows:
@@ -257,7 +259,7 @@ def score(root: Path, transcript: Path) -> bool:
     changed = sh(root, "git", "diff", "--name-only", "main..HEAD", "--", "knowledge").split()
     print(
         f"scored at repo {commit}{dirty}; lore-extract sha256:"
-        f"{hashlib.sha256(skill.read_bytes()).hexdigest()[:12]}, model {MODEL}, "
+        f"{hashlib.sha256(skill.read_bytes()).hexdigest()[:12]}, model {model}, "
         f"pages changed {len(changed)}, cost ${result.get('total_cost_usd', 0):.2f}, "
         f"turns {result.get('num_turns')}"
     )
@@ -269,6 +271,7 @@ def main() -> None:
     parser.add_argument("dir", type=Path)
     parser.add_argument("--run", action="store_true", help="run Claude Code headless and score")
     parser.add_argument("--runs", type=int, default=1, help="sessions with --run (default 1)")
+    parser.add_argument("--model", default=MODEL, help=f"agent model (default {MODEL})")
     parser.add_argument("--score", type=Path, metavar="TRANSCRIPT", help="score a finished run")
     args = parser.parse_args()
     if args.runs < 1:
@@ -280,9 +283,8 @@ def main() -> None:
         setup(base)
         transcript = base.with_name(base.name + ".jsonl")
         print(f"Set up {base}. With {Path(lore_bin()).parent} on PATH, run:")
-        print(
-            f"  cd {shlex.quote(str(base))} && {shlex.join(command())} < /dev/null > {transcript}"
-        )
+        agent = shlex.join(command(args.model))
+        print(f"  cd {shlex.quote(str(base))} && {agent} < /dev/null > {transcript}")
         print(f"Then: uv run python evals/extract.py {base} --score {transcript}")
         return
     print(f"{args.runs} session(s), at most {args.runs * BUDGET_USD} USD")
@@ -290,7 +292,7 @@ def main() -> None:
     for i in range(1, args.runs + 1):
         root, transcript = base / f"run-{i}", base / f"run-{i}.jsonl"
         setup(root)
-        run(root, transcript)
+        run(root, transcript, args.model)
         print(f"\n## run {i}: {root}")
         passed += score(root, transcript)
     print(f"\n{passed}/{args.runs} runs passed all checks")
