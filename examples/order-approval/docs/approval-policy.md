@@ -7,3 +7,4 @@
 3. An approval request that is not decided within 3 working days is escalated to the finance lead.
 4. Cancelling a submitted order asks the buyer to confirm.
 5. The order details page links back to the approver's inbox.
+6. Orders from a new buyer need an extra check; how long a buyer counts as new is to be confirmed.

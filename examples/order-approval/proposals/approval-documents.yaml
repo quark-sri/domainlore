@@ -36,3 +36,16 @@ pages:
         doc: docs/approval-rules.pdf
         quote: The approver must not be the buyer who placed the order.
         after: they placed.
+  # The policy leaves "new buyer" open: record an Open Question, do not guess. The questions page
+  # is given with a full body (the existing text, then the item), so its review is removed.
+  - id: questions
+    type: Open Questions
+    title: Open questions
+    description: Ambiguities that neither the Sources nor the code settle, waiting for a person.
+    body: |
+      # Open questions
+
+      Add one item per question. Link the pages it affects and say who can answer it.
+      When it is answered, update the pages, cite the answer as a Source and remove the item.
+
+      - **How long does a buyer count as new?** The policy requires an extra check for orders from a new buyer but gives no period. Affects [Approval threshold](/approvals/rules/approval-threshold.md). Who can answer: Finance, the owner of the BRD.
