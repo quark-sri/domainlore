@@ -204,6 +204,7 @@ def checks(root: Path, transcript: Path) -> tuple[list[tuple[str, bool]], list[s
         and frontmatter_at(root, p).get("verified")
         and not ((root / p).is_file() and frontmatter(root / p).get("verified"))
     ]
+    question = open_question(root)
     checked = spans(root)
     good = sum(ok for *_, ok in checked)
     check = subprocess.run([lore_bin(), "check"], cwd=root, capture_output=True)
@@ -229,6 +230,7 @@ def checks(root: Path, transcript: Path) -> tuple[list[tuple[str, bool]], list[s
             bool(checked) and good == len(checked),
         ),
         ("no review removed", not reviewed),
+        ("Open Question for the new-buyer period, old text kept", question),
         ("lore check: 0 errors", check.returncode == 0),
     ]
     details = [f"bad span: {page} [{sid}]" for page, sid, ok in checked if not ok]
@@ -236,6 +238,18 @@ def checks(root: Path, transcript: Path) -> tuple[list[tuple[str, bool]], list[s
     details += [f"commit: {c}" for c in commits if not c.startswith("Proposal: ")]
     details += [f"uncommitted: {line}" for line in uncommitted]
     return rows, details
+
+
+def open_question(root: Path) -> bool:
+    """The questions page keeps its old text and has a new item about the vague "new buyer"."""
+    page = root / "knowledge" / "questions.md"
+    if not page.is_file():
+        return False
+    old = sh(root, "git", "show", "main:knowledge/questions.md").split("\n---", 1)[1]
+    body = page.read_text(encoding="utf-8").split("\n---", 1)[1].split("<!-- generated:start")[0]
+    kept = all(line in body for line in old.splitlines() if line.strip())
+    items = [line for line in body.splitlines() if line.startswith("- ") and line not in old]
+    return kept and any("new buyer" in line.lower() for line in items)
 
 
 def frontmatter_at(root: Path, path: str, ref: str = "main") -> dict:

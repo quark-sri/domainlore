@@ -66,7 +66,7 @@ def score(extract, root, uses, tmp_path):
     events = [{"type": "assistant", "message": {"content": content}}, {"type": "result"}]
     transcript.write_text("\n".join(json.dumps(e) for e in events) + "\n")
     rows, _ = extract.checks(root, transcript)
-    return {name.split(" (")[0]: ok for name, ok in rows}
+    return {name.split(" (")[0].split(", old")[0]: ok for name, ok in rows}
 
 
 def test_setup_removes_the_planted_conflict_and_the_amounts(extract, tmp_path):
@@ -127,6 +127,17 @@ def delete_a_reviewed_page(root, uses):
     git(root, "commit", "-qm", "Proposal: drop four-eyes")
 
 
+def forget_the_question(root, uses):
+    git(root, "checkout", "-q", "main", "--", "knowledge/questions.md")
+    git(root, "commit", "-qm", "Proposal: no question")
+
+
+def drop_the_old_questions(root, uses):
+    page = root / "knowledge/questions.md"
+    page.write_text(re.sub(r"(?m)^Add one item.*\n", "", page.read_text()))
+    git(root, "commit", "-qam", "Proposal: shorter questions")
+
+
 def remove_the_conflict(root, uses):
     git(root, "rm", "-q", "knowledge/conflicts/approval-threshold-amount.md")
     git(root, "commit", "-qm", "Proposal: no conflict")
@@ -145,6 +156,8 @@ def remove_the_conflict(root, uses):
         (break_a_span, "document spans verified"),
         (delete_a_reviewed_page, "no review removed"),
         (remove_the_conflict, "planted Spec Conflict found"),
+        (forget_the_question, "Open Question for the new-buyer period"),
+        (drop_the_old_questions, "Open Question for the new-buyer period"),
     ],
     ids=lambda v: v.__name__ if callable(v) else "",
 )
