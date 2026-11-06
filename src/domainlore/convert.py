@@ -18,6 +18,16 @@ from .config import Config
 
 HEADING = re.compile(r"^(#{1,6})[ \t]+(.+?)[ \t#]*$", re.MULTILINE)
 TEXT_SUFFIXES = (".md", ".markdown", ".txt")
+CODE_SUFFIXES = (  # read as plain text, with no Markdown sections ("#" is a comment there)
+    *(".py", ".js", ".jsx", ".ts", ".tsx", ".java", ".kt", ".go", ".rb", ".cs", ".php", ".rs"),
+    *(".sql", ".sh", ".yaml", ".yml", ".json", ".toml", ".html", ".css"),
+)
+MAX_CODE_BYTES = 200_000  # a larger code file is skipped
+SECRET_NAME = re.compile(
+    r"^\.env|secret|credential|password|\.(pem|key|p12|pfx|tfvars)$|^id_(rsa|ed25519|ecdsa)",
+    re.IGNORECASE,
+)  # a file that may hold secrets is never converted, so a quote cannot put one in a page
+IGNORED_DIRS = {"node_modules", "__pycache__", "venv", "dist", "build", "target", "graphify-out"}
 EXTRA = {".docx": "docx", ".pdf": "pdf"}
 
 
@@ -79,7 +89,7 @@ PACKAGES = {".docx": ("mammoth", "markdownify"), ".pdf": ("pypdf",)}
 
 def converter(suffix: str) -> str:
     """The converter and its versions for a file type; offsets depend on it, so it is cached."""
-    if suffix in TEXT_SUFFIXES:
+    if suffix in (*TEXT_SUFFIXES, *CODE_SUFFIXES):
         return "text"
     try:
         return " + ".join(f"{name} {metadata.version(name)}" for name in PACKAGES[suffix])
@@ -90,7 +100,7 @@ def converter(suffix: str) -> str:
 def to_text(path: Path) -> tuple[str, list[Page]]:
     """Return (text, pages) for one document."""
     suffix = path.suffix.lower()
-    if suffix in TEXT_SUFFIXES:
+    if suffix in (*TEXT_SUFFIXES, *CODE_SUFFIXES):
         return path.read_text(encoding="utf-8"), []
     if suffix == ".docx":
         import mammoth
@@ -128,6 +138,12 @@ def load(config: Config, rel: str) -> Document | None:
     return Document(**data)
 
 
+def skipped(path: Path, base: Path) -> bool:
+    """A file in a hidden folder or a dependency or build folder is not a source."""
+    parts = path.relative_to(base).parts[:-1]
+    return any(part.startswith(".") or part in IGNORED_DIRS for part in parts)
+
+
 def documents(config: Config) -> list[tuple[Path, str]]:
     """Every file under the configured source folders, with its default basis."""
     found = []
@@ -136,7 +152,9 @@ def documents(config: Config) -> list[tuple[Path, str]]:
         if base.is_file():
             found.append((base, basis))
         elif base.is_dir():
-            found += [(p, basis) for p in sorted(base.rglob("*")) if p.is_file()]
+            found += [
+                (p, basis) for p in sorted(base.rglob("*")) if p.is_file() and not skipped(p, base)
+            ]
     return found
 
 
@@ -145,7 +163,17 @@ def convert(config: Config) -> list[tuple[str, str]]:
     outcomes = []
     for path, basis in documents(config):
         rel = path.relative_to(config.root).as_posix()
-        if path.suffix.lower() not in (*TEXT_SUFFIXES, *EXTRA):
+        suffix = path.suffix.lower()
+        if SECRET_NAME.search(path.name):
+            outcomes.append((rel, "skipped: the name looks like a secrets file"))
+            continue
+        if suffix in CODE_SUFFIXES and basis != "actual":
+            outcomes.append((rel, 'skipped: code is read only under a `basis = "actual"` source'))
+            continue
+        if suffix in CODE_SUFFIXES and path.stat().st_size > MAX_CODE_BYTES:
+            outcomes.append((rel, f"skipped: larger than {MAX_CODE_BYTES // 1000} KB"))
+            continue
+        if suffix not in (*TEXT_SUFFIXES, *CODE_SUFFIXES, *EXTRA):
             outcomes.append((rel, "skipped: no converter for this file type"))
             continue
         try:
@@ -158,8 +186,13 @@ def convert(config: Config) -> list[tuple[str, str]]:
         if cached and (cached.sha256, cached.basis, cached.converter) == (sha, basis, used):
             outcomes.append((rel, "unchanged"))
             continue
-        text, pages = to_text(path)
-        doc = Document(rel, sha, basis, used, sections(text), pages, text)
+        try:
+            text, pages = to_text(path)
+        except UnicodeDecodeError:
+            outcomes.append((rel, "skipped: not UTF-8 text"))
+            continue
+        found = [] if path.suffix.lower() in CODE_SUFFIXES else sections(text)
+        doc = Document(rel, sha, basis, used, found, pages, text)
         target = cache_path(config, rel)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(asdict(doc), indent=2, ensure_ascii=False) + "\n", "utf-8")

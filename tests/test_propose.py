@@ -369,3 +369,71 @@ def test_two_cites_after_the_same_text_keep_their_order(reviewed):
     propose(config, proposal(reviewed, {"id": "shop/rules/threshold", "cites": cites}), branch=None)
     body = load_bundle(config.knowledge_dir).concepts["shop/rules/threshold"].body
     assert "need approval.[^wiki][^policy][^esc] Undecided" in body
+
+
+def test_a_quote_from_code_is_cited_by_its_lines_with_the_actual_basis(project):
+    (project.root / "lore.toml").write_text(
+        '[knowledge]\ndir = "knowledge"\n[[sources]]\npath = "src"\nbasis = "actual"\n'
+    )
+    (project.root / "src").mkdir()
+    (project.root / "src" / "rules.py").write_text("# Limits\nLIMIT = 10_000  # EUR\n\nOTHER = 1\n")
+    config = load_config(project.root)
+    convert(config)
+    page = {
+        **RULE,
+        "id": "shop/rules/code-limit",
+        "basis": "actual",
+        "body": "# Limit in the code\n\nThe code sets the limit to 10 000.[^code]\n",
+        "cites": {"code": {"doc": "src/rules.py", "quote": "LIMIT = 10_000  # EUR"}},
+    }
+    propose(config, proposal(project, page), branch=None)
+    concept = load_bundle(config.knowledge_dir).concepts["shop/rules/code-limit"]
+    [source] = concept.meta["sources"]
+    assert source["title"] == "rules.py, line 2" and source["basis"] == "actual"
+    assert source["resource"].startswith("../src/rules.py#char=")
+    assert '[^code]: rules.py, line 2: "LIMIT = 10_000 # EUR"' in concept.body  # spaces collapse
+    assert [i for i in run_check(config) if i.level == "error"] == []
+
+
+def source_title(project, doc: str, text: str, quote: str, basis: str = "intended") -> str:
+    folder = doc.split("/")[0]
+    (project.root / "lore.toml").write_text(
+        f'[knowledge]\ndir = "knowledge"\n[[sources]]\npath = "{folder}"\nbasis = "{basis}"\n'
+    )
+    (project.root / folder).mkdir(exist_ok=True)
+    (project.root / doc).write_text(text)
+    config = load_config(project.root)
+    convert(config)
+    page = {**RULE, "cites": {"policy": {"doc": doc, "quote": quote}}}
+    propose(config, proposal(project, page), branch=None)
+    concept = load_bundle(config.knowledge_dir).concepts["shop/rules/threshold"]
+    return concept.meta["sources"][0]["title"]
+
+
+@pytest.mark.parametrize(
+    ("doc", "text", "quote", "title"),
+    [
+        (
+            "src/rules.py",
+            "# Limits\nLIMIT = 10_000\nLOW = 1\nOTHER = 2\n",
+            "LIMIT = 10_000 LOW = 1",
+            "rules.py, lines 2-3",
+        ),
+        (
+            "docs/p.md",
+            "Intro line.\n\n# Rules\n\nOrders above 5 000 EUR need approval.\n",
+            "above 5 000 EUR",
+            "p.md, Rules",
+        ),
+        (
+            "docs/p.md",
+            "Orders above 5 000 EUR need approval.\n\n# Rules\n",
+            "above 5 000 EUR",
+            "p.md, line 1",
+        ),
+    ],
+    ids=["code-two-lines", "section-wins", "before-any-heading"],
+)
+def test_the_source_title_names_the_section_else_the_lines(project, doc, text, quote, title):
+    basis = "actual" if doc.startswith("src") else "intended"
+    assert source_title(project, doc, text, quote, basis) == title

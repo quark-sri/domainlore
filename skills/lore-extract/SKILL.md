@@ -18,7 +18,7 @@ You turn documents into a **Proposal**: new or changed Knowledge Base pages wher
 
    In both cases record both sides; never pick a winner. See [conflict-example.md](conflict-example.md) for a Spec Conflict page.
 
-   If the documents do not settle a vague value, add an Open Question; do not guess. Open Questions live on one page, concept ID `questions` (`knowledge/questions.md`). Give that page in the Proposal with its frontmatter fields and a full `body`: the existing body copied unchanged (without generated blocks), then one list item per question. An item links the pages it affects and says who can answer; it needs no cite. For example:
+   If the documents do not settle a vague value, use [lore-resolve](../lore-resolve/SKILL.md): it checks the other sources and the code and asks a person. What it cannot settle becomes an Open Question; do not guess. Open Questions live on one page, concept ID `questions` (`knowledge/questions.md`). Give that page in the Proposal with its frontmatter fields and a full `body`: the existing body copied unchanged (without generated blocks), then one list item per question. An item links the pages it affects and says who can answer; it needs no cite. For example:
 
    ```yaml
    - id: questions

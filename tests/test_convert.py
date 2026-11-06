@@ -5,7 +5,7 @@ import hashlib
 import pytest
 
 from domainlore.config import load_config
-from domainlore.convert import convert, load, sections
+from domainlore.convert import IGNORED_DIRS, MAX_CODE_BYTES, convert, load, sections
 from tests.conftest import EXAMPLE
 
 POLICY = """# Purchase policy
@@ -26,9 +26,9 @@ A cancel asks the buyer to confirm.
 """
 
 
-def with_sources(project, path: str = "docs") -> None:
+def with_sources(project, path: str = "docs", basis: str = "intended") -> None:
     (project.root / "lore.toml").write_text(
-        f'[knowledge]\ndir = "knowledge"\n[[sources]]\npath = "{path}"\nbasis = "intended"\n'
+        f'[knowledge]\ndir = "knowledge"\n[[sources]]\npath = "{path}"\nbasis = "{basis}"\n'
     )
 
 
@@ -143,3 +143,71 @@ def test_demo_documents_match_their_generator():
     docs = EXAMPLE / "docs"
     assert (docs / "purchase-approval-brd.docx").read_bytes() == gen.brd()
     assert (docs / "approval-rules.pdf").read_bytes() == gen.rules()
+
+
+CODE = """# Approval limits
+LIMIT = 10_000  # EUR
+
+
+def needs_approval(total):
+    return total > LIMIT
+"""
+
+
+def write(project, rel: str, data: str | bytes = "x = 1\n") -> None:
+    target = project.root / rel
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_bytes(data if isinstance(data, bytes) else data.encode())
+
+
+def test_code_is_text_with_no_markdown_sections(project):
+    with_sources(project, "src", "actual")
+    write(project, "src/pkg/rules.py", CODE)
+    write(project, "src/blob.py", b"\xff\xfe\x00")
+    outcomes = dict(convert(load_config(project.root)))
+    assert outcomes == {
+        "src/pkg/rules.py": "converted",
+        "src/blob.py": "skipped: not UTF-8 text",
+    }
+    doc = load(load_config(project.root), "src/pkg/rules.py")
+    assert doc.sections == [] and doc.converter == "text" and doc.basis == "actual"
+    start = doc.text.index("10_000")  # "# Approval limits" is a comment, not a heading
+    assert doc.locate(start, start + 6)["lines"] == [2, 2]
+
+
+@pytest.mark.parametrize("folder", sorted(IGNORED_DIRS) + [".venv", ".git"])
+def test_hidden_dependency_and_build_folders_are_not_sources(project, folder):
+    with_sources(project, "src", "actual")
+    write(project, "src/rules.py", CODE)
+    write(project, f"src/{folder}/lib.py")
+    assert [rel for rel, _ in convert(load_config(project.root))] == ["src/rules.py"]
+
+
+@pytest.mark.parametrize(
+    "name",
+    [".env", ".env.local", "config/secrets.yaml", "prod.pem", "tls.key", "credentials.json"]
+    + ["db_password.txt", "main.tfvars", "id_rsa", "src/Secret.py"],
+)
+def test_files_that_may_hold_secrets_are_never_converted(project, name):
+    with_sources(project, "src", "actual")
+    write(project, f"src/{name}", "KEY = 'hunter2'\n")
+    [(rel, outcome)] = convert(load_config(project.root))
+    assert outcome == "skipped: the name looks like a secrets file"
+    assert not (project.root / ".lore" / "cache").exists()
+
+
+def test_code_is_read_only_under_an_actual_source_and_not_when_it_is_large(project):
+    with_sources(project, "docs", "intended")
+    write(project, "docs/notes.yaml", "limit: 5\n")
+    [(rel, outcome)] = convert(load_config(project.root))
+    assert outcome.startswith('skipped: code is read only under a `basis = "actual"`')
+    with_sources(project, "src", "actual")
+    write(project, "src/big.py", "x = 1\n" * (MAX_CODE_BYTES // 6 + 10))
+    [(rel, outcome)] = convert(load_config(project.root))
+    assert outcome == "skipped: larger than 200 KB"
+
+
+def test_a_hidden_folder_named_as_the_source_path_still_converts(project):
+    with_sources(project, ".legacy", "actual")
+    write(project, ".legacy/rules.py", CODE)
+    assert convert(load_config(project.root)) == [(".legacy/rules.py", "converted")]
