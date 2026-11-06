@@ -59,7 +59,9 @@ class Quote:
 
     def source(self, config: Config) -> dict:
         where = self.doc.locate(self.start, self.end)
-        place = f"p. {where['page']}" if where["page"] else where["section"]
+        first, last = where["lines"]
+        lines = f"line {first}" if first == last else f"lines {first}-{last}"
+        place = f"p. {where['page']}" if where["page"] else where["section"] or lines
         name = Path(self.doc.path).name
         resource = relpath(config.root / self.doc.path, config.knowledge_dir)
         return {

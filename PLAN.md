@@ -222,7 +222,7 @@ flowchart LR
 | extract | agent (default) or LangExtract (optional) | Schema-guided against the LinkML schema; each Fact keeps its source span. |
 | resolve | script + agent | Dedup by external ID (issue key, page ID, route, code symbol) + aliases; agent judges only ambiguous merges. Detect Conflicts. Run ambiguity resolution (section 7). |
 | propose | script | Writes changes on a branch and opens a PR; only files whose evidence changed are touched (OpenWiki's evidence-drift idea). |
-| review | person | Merge = `human-reviewed` for the Facts in the PR. |
+| review | person | The reviewer marks each page they approve by adding `verified: {by: human:<id>, at}` to its frontmatter; merging does not add the mark. The `lore-review` skill guides the person and never sets the mark. A command that writes it is not built. |
 | build | script | Regenerates indexes, GLOSSARY.md, Mermaid blocks, `graph.json`. |
 | check | script, CI | Fails on schema errors, broken links, Facts without Sources, hand-edited generated blocks, stale Facts. |
 
@@ -231,12 +231,12 @@ flowchart LR
 When extraction meets an ambiguity — a vague term ("large orders"), a missing value ("limit to be confirmed"), or a rule that two readings fit — resolve in this order:
 
 1. **Other Sources already pulled.** Another ticket, page or document may settle it.
-2. **Production code, when available.** The agent explores the code read-only (optionally with a code-graph tool such as graphify for large codebases) and records what it finds as an **Actual** Fact citing file and lines, at `machine-confirmed`.
-   - If the code *clarifies* the Intended Fact (the "large order" threshold is 10 000 in both), the Intended Fact is linked to the code evidence and raised to `machine-confirmed`.
+2. **Production code, when available.** The agent explores the code read-only (optionally with a code-graph tool such as graphify for large codebases) and cites the lines it finds (a code file under a `[[sources]]` entry with `basis = "actual"`, converted by `lore convert`; the Source title shows the lines). graphify is optional and needs the user's approval before it runs.
+   - If the code *clarifies* the Intended Fact (the "large order" threshold is 10 000 in both), the code lines are added as one more Source (`basis: actual`) on the Intended Fact. A Proposal ignores `verified`, so an agent cannot raise the page to `machine-confirmed`; that stays open.
    - If the code *contradicts* the Intended Fact, that is a **Gap**, not a resolution. Code shows what the product does, not what it should do.
 3. **Ask a person.** Interactive runs ask the user in the session; batch and CI runs append an **Open Question** to `knowledge/questions.md` and keep the Fact `unverified`.
 
-The order is configurable in `lore.toml` (`ambiguity.order = ["sources", "code", "ask"]`); a team that wants a person to decide first sets `["sources", "ask", "code"]`.
+The order is configurable in `lore.toml` (`ambiguity.order = ["sources", "code", "ask"]`); a team that wants a person to decide first sets `["sources", "ask", "code"]`. A step left out of the list is not used; if no listed step settles the ambiguity, the result is an Open Question. Code files are read only under a `[[sources]]` entry with `basis = "actual"`; files named like secrets are never converted.
 
 ## 8. Diagrams (Mermaid)
 
@@ -335,7 +335,7 @@ The `query` / `path` / `explain` commands mirror graphify's interface because ag
 7. ✅ **`query` / `path` / `explain`** (keyword + type hints; retrieval eval hit@5 93%).
 8. ✅ **`init`** (lore.toml, AGENTS.md / CLAUDE.md block, Cursor rule) and the `lore-use` skill + Claude Code plugin.
 9. ✅ **Manual agent eval** (`evals/README.md`: 30/30 correct) and **tag v0.1.0**.
-10. ⏳ **v0.2a** per section 13: ✅ `lore convert` (md, docx, pdf), demo Word BRD and PDF rules; ✅ the Proposal file, `lore propose` and the `lore-extract` skill (ADR 0003); ✅ Sources added to a page keep its review, a rewritten page loses it; ✅ agent extraction test (`evals/extract.py`, results in `evals/README.md`); next: the `lore-resolve` and `lore-review` skills.
+10. ⏳ **v0.2a** per section 13: ✅ `lore convert` (md, docx, pdf), demo Word BRD and PDF rules; ✅ the Proposal file, `lore propose` and the `lore-extract` skill (ADR 0003); ✅ Sources added to a page keep its review, a rewritten page loses it; ✅ agent extraction test (`evals/extract.py`, results in `evals/README.md`); ✅ `lore-resolve` (code as a Source, `ambiguity.order`, optional graphify) and `lore-review` (guide only) skills; next: the Docling converter and the v0.2a exit check.
 
 ## 15. Prior art and how we use it
 

@@ -29,14 +29,14 @@ Sub-folder names inside an Area are a convention; the `type` field is what count
 | `description` | | One sentence; shown in indexes and `lore query` |
 | `sources` | yes for the six domain types | List of `{id, resource, title, author, last_modified, version, basis}`; `resource` is required |
 | `basis` | | Default basis of the page's facts: `intended` or `actual` |
-| `verified` | | OKF verification events `{by, at}`; `by: human:<id>` makes the page `human-reviewed`, any other actor `machine-confirmed`, none `unverified` |
+| `verified` | | OKF verification events `{by, at}`; `by: human:<id>` makes the page `human-reviewed`, any other actor `machine-confirmed`, none `unverified`. Example: `verified: { by: human:jane, at: 2026-11-06T10:00:00Z }`; the id after `human:` is free text. A reviewer adds it by hand; an agent never does, and a Proposal ignores it |
 | `relations` | | Map of relation name → list of targets (below) |
 | `aliases` | | Other names; they appear under `_Avoid_` in the glossary |
 | `status`, `stale_after`, `tags`, `generated` | | As in OKF |
 
 Cite a source in the body with a footnote whose label is the source `id`: `…needs approval.[^policy]` and `[^policy]: Purchase approval policy v2`.
 
-A source written by `lore propose` from a converted document has an exact location ([ADR 0003](https://github.com/quark-sri/domainlore/blob/main/docs/adr/0003-document-sources-as-text-fragments.md)): `resource` is the document path plus `#char=<start>,<end>` (offsets into the text from `lore convert`), `version` is `sha256:<hash>` of the file, `title` names the section or PDF page, and the footnote quotes the cited text with the Markdown emphasis characters (`*`, `` ` ``, `__`) removed. To add a document Source to an existing page without changing its facts, a Proposal gives the page only `id` and `cites`, each with `after` (see the `lore-extract` skill); the page keeps its review.
+A source written by `lore propose` from a converted document has an exact location ([ADR 0003](https://github.com/quark-sri/domainlore/blob/main/docs/adr/0003-document-sources-as-text-fragments.md)): `resource` is the document path plus `#char=<start>,<end>` (offsets into the text from `lore convert`), `version` is `sha256:<hash>` of the file, `title` names the section, the PDF page or (for code and text with no sections) the lines, and the footnote quotes the cited text with the Markdown emphasis characters (`*`, `` ` ``, `__`) removed. To add a document Source to an existing page without changing its facts, a Proposal gives the page only `id` and `cites`, each with `after` (see the `lore-extract` skill); the page keeps its review.
 
 ## Relations
 

@@ -11,7 +11,7 @@ from . import __version__
 from .build import build as run_build
 from .build import source_bundle
 from .check import as_json, run_check
-from .config import find_root, load_config
+from .config import ConfigError, find_root, load_config
 from .convert import convert as run_convert
 from .graph import Graph
 from .init import init as run_init
@@ -34,7 +34,11 @@ RootOption = Annotated[
 
 
 def config_for(root: Path | None):
-    return load_config(root.resolve() if root else find_root(Path.cwd()))
+    try:
+        return load_config(root.resolve() if root else find_root(Path.cwd()))
+    except ConfigError as err:
+        typer.echo(str(err), err=True)
+        raise typer.Exit(2) from err
 
 
 def graph_for(root: Path | None) -> Graph:

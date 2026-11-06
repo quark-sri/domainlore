@@ -7,6 +7,11 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 CONFIG_FILE = "lore.toml"
+AMBIGUITY_STEPS = ("sources", "code", "ask")  # the order in which an ambiguity is resolved
+
+
+class ConfigError(ValueError):
+    """lore.toml has a value that cannot be used."""
 
 
 @dataclass(frozen=True)
@@ -40,6 +45,7 @@ class Config:
     relations: dict[str, RelationSpec] = field(default_factory=lambda: dict(BUILTIN_RELATIONS))
     max_diagram_nodes: int = 25
     sources: dict[str, str] = field(default_factory=dict)  # document path -> default basis
+    ambiguity_order: tuple[str, ...] = AMBIGUITY_STEPS
 
     @property
     def path(self) -> Path:
@@ -67,6 +73,20 @@ def load_config(root: Path) -> Config:
     config.areas = {
         name: str(area.get("description", "")) for name, area in data.get("areas", {}).items()
     }
+    ambiguity = data.get("ambiguity", {})
+    order = ambiguity.get("order", list(AMBIGUITY_STEPS)) if isinstance(ambiguity, dict) else None
+    if (
+        not isinstance(order, list)
+        or not order
+        or not all(isinstance(step, str) for step in order)
+        or len(set(order)) != len(order)
+        or not set(order) <= set(AMBIGUITY_STEPS)
+    ):
+        raise ConfigError(
+            f"lore.toml: ambiguity.order must list each of {', '.join(AMBIGUITY_STEPS)} "
+            f"at most once, got {order!r}"
+        )
+    config.ambiguity_order = tuple(order)
     for source in data.get("sources", []):
         config.sources[str(source["path"])] = str(source.get("basis", "intended"))
     for name, spec in data.get("relations", {}).items():
