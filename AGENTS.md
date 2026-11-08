@@ -12,3 +12,10 @@
 - Schema change: edit `schema/domainlore.yaml`, run `./scripts/gen-schema.sh`, commit both.
 - Output change: run `uv run lore build --root examples/order-approval` and review the diff; the demo is the golden fixture.
 - Before a commit: `uv run ruff check . && uv run ruff format --check . && uv run pytest`.
+- Review before the pull request: a change that adds behaviour, a file format, a schema or agent-facing text (skills, CLI messages) gets a review before the pull request is opened. A small fix or a docs change needs only the checks above.
+- Agent runs cost money (`evals/extract.py --run`, see [evals/README.md](evals/README.md)): a code, wording or eval change needs no run. A skill change that alters what the agent must do needs 1 run before the merge. Before a release, run `--runs 3`; at least 2 must pass.
+
+## Facts and trust
+
+- Code files are a Source only under a `[[sources]]` entry with `basis = "actual"`. `lore convert` never reads files named like secrets (`.env`, `*secret*`, `*.pem`); never quote a password, key or personal data into a page.
+- An agent never sets `verified`. A person adds `verified: { by: human:<id>, at: ... }` after review; a Proposal ignores the key, and merging does not add it.
