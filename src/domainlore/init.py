@@ -28,6 +28,15 @@ max_nodes = 25
 # path = "docs"
 # basis = "intended"
 
+# Source code for `lore convert`, so a vague value can be settled from what the product does.
+# [[sources]]
+# path = "src"
+# basis = "actual"
+
+# How an agent settles an ambiguity: other sources, then the code, then ask a person.
+# [ambiguity]
+# order = ["sources", "code", "ask"]
+
 # Extra relation types, beyond the built-in ones.
 # [relations.replaces]
 # label = "replaces"

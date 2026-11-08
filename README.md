@@ -58,6 +58,21 @@ lore check    # validate OKF, schema, sources, relations, conflicts, generated c
 
 The full field reference is in [skills/lore-use/page-format.md](skills/lore-use/page-format.md).
 
+## Settling vague values
+
+When a document leaves a value open ("limit to be confirmed"), the `lore-resolve` skill checks the other sources, then the production code, then asks a person. To let it read the code, add the code as a source with the basis `actual`:
+
+```toml
+[[sources]]
+path = "src"
+basis = "actual"
+
+[ambiguity]
+order = ["sources", "code", "ask"]   # the default; a step left out is not used
+```
+
+`lore convert` reads code files (`.py`, `.js`, `.ts`, `.java`, `.go`, `.sql`, `.yaml` and a few more) only under a source with the basis `actual`; other types (for example `.c`) are reported as "skipped: no converter". It skips hidden, dependency and build folders, files whose name looks like a secrets file (`.env`, `*secret*`, `*.pem`), code over 200 KB and files that are not UTF-8. A Source from code is titled with its lines. The optional graphify tool can help find where a value is defined; the skill asks you before it runs it.
+
 ## Commands
 
 | Command | What it does |
@@ -68,7 +83,7 @@ The full field reference is in [skills/lore-use/page-format.md](skills/lore-use/
 | `lore query "<question>"` | Find the pages that answer a domain question, with their relations |
 | `lore explain <page>` | One page: trust, basis, sources, every relation |
 | `lore path <a> <b>` | How two concepts connect |
-| `lore convert` | Convert the source documents in `lore.toml` to cached text with offsets (`.lore/cache/`); Word needs `domainlore[docx]`, PDF needs `domainlore[pdf]` |
+| `lore convert` | Convert the source documents and code in `lore.toml` to cached text with offsets (`.lore/cache/`); Word needs `domainlore[docx]`, PDF needs `domainlore[pdf]` |
 | `lore propose <file>` | Apply a Proposal: check every quote against its document, write the pages with exact source locations, build, check, commit on a new branch (`--no-branch` to skip git) |
 
 ## What gets generated
@@ -86,7 +101,7 @@ See the demo product in [examples/order-approval/](examples/order-approval/knowl
 ## Use it from your agent
 
 - **Any agent**: the `AGENTS.md` block from `lore init` points to `knowledge/` and the `lore` commands.
-- **Agent Skills** (Claude Code, Codex, Cursor, Copilot, Gemini CLI and others): [`skills/lore-use`](skills/lore-use/SKILL.md) to read and record facts, [`skills/lore-extract`](skills/lore-extract/SKILL.md) to extract them from documents.
+- **Agent Skills** (Claude Code, Codex, Cursor, Copilot, Gemini CLI and others): [`skills/lore-use`](skills/lore-use/SKILL.md) to read and record facts, [`skills/lore-extract`](skills/lore-extract/SKILL.md) to extract them from documents, [`skills/lore-resolve`](skills/lore-resolve/SKILL.md) to settle a vague value from other sources, the code or a person, and [`skills/lore-review`](skills/lore-review/SKILL.md) to guide a person through reviewing a Proposal.
 - **Claude Code plugin**:
 
   ```text
