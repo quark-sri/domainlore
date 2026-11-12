@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `scripts/install-skills.sh` installs the four skills for Codex, Cursor, GitHub Copilot, Gemini CLI, Antigravity, Devin Desktop, OpenCode, Cline and Claude Code without the plugin, for one user (`--user`) or one repository (`--project`). It links to the clone by default (`--copy` for copies), installs a shared skill folder once, never replaces a folder that it did not install, and tells you how to install the `lore` command when it is missing. The agents and folders match qestack's installer.
+
 - The `lore-resolve` skill: settle a vague value from the other sources, then the production code, then a person, in the order of `[ambiguity] order` in `lore.toml` (default `sources`, `code`, `ask`; a bad value is refused). The graphify code-graph tool is optional and needs the user's approval.
 - The `lore-review` skill: guides a person through a Proposal pull request. It never sets `verified`; the reviewer adds that mark by hand.
 - `lore convert` reads code files (Python, JavaScript, Java and others) only under a `[[sources]]` path with `basis = "actual"`, with no Markdown sections; a Source from code is titled with its lines (a quote before the first heading of a Markdown file now also gets its line). Hidden, dependency and build folders, files named like secrets (`.env`, `*secret*`, `*.pem`), code over 200 KB and files that are not UTF-8 are skipped, each with a reason.
