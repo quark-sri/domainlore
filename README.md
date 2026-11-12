@@ -108,6 +108,36 @@ See the demo product in [examples/order-approval/](examples/order-approval/knowl
   /plugin install domainlore --marketplace quark-sri/domainlore
   ```
 
+### Install the skills for other agents
+
+Each agent reads skills from a skill folder. Most agents share one folder:
+
+| Agent | Project folder | User folder |
+|---|---|---|
+| Codex, Cursor, GitHub Copilot, Gemini CLI, Devin Desktop, OpenCode | `.agents/skills/` | `~/.agents/skills/` |
+| Antigravity | `.agents/skills/` | `~/.gemini/antigravity-cli/skills/` and `~/.gemini/config/skills/` |
+| Claude Code without the plugin | `.claude/skills/` | `~/.claude/skills/` |
+| Cline | `.cline/skills/` | `~/.cline/skills/` |
+
+1. Clone domainlore and install the skills for your agent:
+
+   ```bash
+   git clone https://github.com/quark-sri/domainlore ~/domainlore
+   ~/domainlore/scripts/install-skills.sh --agent codex --user                # all your projects
+   ~/domainlore/scripts/install-skills.sh --agent cursor --project ~/my-repo  # one repository
+   ~/domainlore/scripts/install-skills.sh --help                              # all agents and options
+   ```
+
+2. Install the `lore` command. The skills run it. The `docx` and `pdf` extras let it read Word and PDF documents:
+
+   ```bash
+   uv tool install "domainlore[docx,pdf] @ git+https://github.com/quark-sri/domainlore"
+   ```
+
+By default, the script makes links to `skills/` in the clone, so `git pull` updates the skills. Use `--copy` for real copies, for example on Windows; after `git pull`, run the same command again. `--agent all` installs for each agent except Claude Code, which gets the skills from the plugin.
+
+The script never replaces a skill folder or link that it did not install. It leaves the other skills in the folder alone. If it skips a skill, it stops with exit code 1, because the skills link to each other.
+
 ## Develop
 
 ```bash
