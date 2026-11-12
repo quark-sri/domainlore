@@ -44,8 +44,8 @@ Skill folders:
 Links point to skills/ of this clone, so git pull updates them. Copies do not change:
 after git pull, run the same command again.
 
-The skills run the lore command. Install it once:
-  uv tool install git+https://github.com/quark-sri/domainlore
+The skills run the lore command. Install it once (docx and pdf: read Word and PDF documents):
+  uv tool install "domainlore[docx,pdf] @ git+https://github.com/quark-sri/domainlore"
 EOF
 }
 
@@ -62,8 +62,20 @@ folders() {
   esac
 }
 
-# Install the skills into $1. $2: link or copy.
-# A folder that is not a link and not a domainlore copy is not ours: skip it.
+# True if $1 is a skill folder or link that this script installed (or a broken link).
+ours() {
+  local dst="$1" to
+  if [ -L "$dst" ]; then
+    to="$(readlink "$dst")"
+    case "$to" in "$SKILLS"/*) return 0 ;; esac
+    [ -e "$dst" ] || return 0  # a broken link holds nothing
+    return 1
+  fi
+  [ ! -e "$dst" ] || [ -f "$dst/$MARKER" ]
+}
+
+# Install the skills into $1. $2: link or copy. A folder or link that is not ours is skipped.
+SKIPPED=0
 install_into() {
   local target="$1" mode="$2" n=0 d name dst
   mkdir -p "$target"
@@ -71,8 +83,9 @@ install_into() {
     [ -f "$d/SKILL.md" ] || continue
     name="$(basename "$d")"
     dst="$target/$name"
-    if [ -e "$dst" ] && [ ! -L "$dst" ] && [ ! -f "$dst/$MARKER" ]; then
+    if ! ours "$dst"; then
       echo "skip $name: $dst exists and is not a domainlore skill"
+      SKIPPED=$((SKIPPED + 1))
       continue
     fi
     rm -rf "$dst"
@@ -130,5 +143,10 @@ case " $LIST " in *" claude "*)
 esac
 if ! command -v lore >/dev/null 2>&1; then
   echo "The skills run the lore command, and it is not on your PATH. Install it:"
-  echo "  uv tool install git+https://github.com/quark-sri/domainlore"
+  echo "  uv tool install \"domainlore[docx,pdf] @ git+https://github.com/quark-sri/domainlore\""
+fi
+if [ "$SKIPPED" -gt 0 ]; then
+  echo "$SKIPPED skill folders were skipped. The skills link to each other, so some links do not work." >&2
+  echo "Move or rename the skipped folders, then run the same command again." >&2
+  exit 1
 fi

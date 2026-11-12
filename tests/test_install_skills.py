@@ -23,8 +23,10 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def run(home: Path, *args: str) -> subprocess.CompletedProcess[str]:
+def run(home: Path, *args: str, path: str | None = None) -> subprocess.CompletedProcess[str]:
     env = {**os.environ, "HOME": str(home)}
+    if path is not None:
+        env["PATH"] = path
     return subprocess.run(
         ["bash", str(SCRIPT), *args], capture_output=True, text=True, env=env, check=False
     )
@@ -61,13 +63,14 @@ def test_a_second_install_replaces_its_own_copies_and_links(tmp_path):
     assert (tmp_path / ".agents/skills/lore-use").is_symlink()
 
 
-def test_a_folder_that_domainlore_did_not_install_is_skipped_and_kept(tmp_path):
+def test_a_folder_that_domainlore_did_not_install_is_kept_and_the_run_fails(tmp_path):
     own = tmp_path / ".agents" / "skills" / "lore-use"
     own.mkdir(parents=True)
     (own / "SKILL.md").write_text("my own skill\n", encoding="utf-8")
     result = run(tmp_path, "--agent", "codex", "--user")
-    assert result.returncode == 0, result.stderr
+    assert result.returncode == 1
     assert "skip lore-use" in result.stdout
+    assert "1 skill folders were skipped" in result.stderr
     assert (own / "SKILL.md").read_text(encoding="utf-8") == "my own skill\n"
     assert (tmp_path / ".agents/skills/lore-extract").is_symlink()
 
@@ -110,4 +113,45 @@ def test_help_lists_the_agents_and_how_to_install_the_lore_command(tmp_path):
     result = run(tmp_path, "--help")
     assert result.returncode == 0
     assert "codex" in result.stdout and "~/.agents/skills" in result.stdout
-    assert "uv tool install git+https://github.com/quark-sri/domainlore" in result.stdout
+    assert "domainlore[docx,pdf] @ git+https://github.com/quark-sri/domainlore" in result.stdout
+
+
+def test_a_link_to_a_folder_of_the_user_is_kept(tmp_path):
+    mine = tmp_path / "my-skills" / "lore-use"
+    mine.mkdir(parents=True)
+    target = tmp_path / ".agents" / "skills"
+    target.mkdir(parents=True)
+    (target / "lore-use").symlink_to(mine)
+    result = run(tmp_path, "--agent", "codex", "--user")
+    assert result.returncode == 1
+    assert (target / "lore-use").resolve() == mine.resolve()
+
+
+def test_a_broken_link_is_replaced(tmp_path):
+    target = tmp_path / ".agents" / "skills"
+    target.mkdir(parents=True)
+    (target / "lore-use").symlink_to(tmp_path / "moved-clone" / "skills" / "lore-use")
+    assert run(tmp_path, "--agent", "codex", "--user").returncode == 0
+    assert (target / "lore-use").resolve() == (ROOT / "skills" / "lore-use").resolve()
+
+
+def test_a_project_path_with_spaces_works(tmp_path):
+    repo = tmp_path / "my repo"
+    repo.mkdir()
+    result = run(tmp_path, "--agent", "codex", "--project", str(repo), "--copy")
+    assert result.returncode == 0, result.stderr
+    assert (repo / ".agents" / "skills" / "lore-use" / "SKILL.md").is_file()
+
+
+def test_claude_installs_into_the_claude_folder_and_warns_about_the_plugin(tmp_path):
+    result = run(tmp_path, "--agent", "claude", "--user")
+    assert result.returncode == 0, result.stderr
+    assert (tmp_path / ".claude" / "skills" / "lore-use").is_symlink()
+    assert "shows each skill two times" in result.stdout
+
+
+def test_without_the_lore_command_the_install_hint_names_the_word_and_pdf_extras(tmp_path):
+    result = run(tmp_path, "--agent", "codex", "--user", path="/usr/bin:/bin")
+    assert result.returncode == 0, result.stderr
+    assert "not on your PATH" in result.stdout
+    assert '"domainlore[docx,pdf] @ git+https://github.com/quark-sri/domainlore"' in result.stdout

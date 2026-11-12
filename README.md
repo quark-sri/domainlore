@@ -128,15 +128,15 @@ Each agent reads skills from a skill folder. Most agents share one folder:
    ~/domainlore/scripts/install-skills.sh --help                              # all agents and options
    ```
 
-2. Install the `lore` command. The skills run it:
+2. Install the `lore` command. The skills run it. The `docx` and `pdf` extras let it read Word and PDF documents:
 
    ```bash
-   uv tool install git+https://github.com/quark-sri/domainlore
+   uv tool install "domainlore[docx,pdf] @ git+https://github.com/quark-sri/domainlore"
    ```
 
 By default, the script makes links to `skills/` in the clone, so `git pull` updates the skills. Use `--copy` for real copies, for example on Windows; after `git pull`, run the same command again. `--agent all` installs for each agent except Claude Code, which gets the skills from the plugin.
 
-The script never replaces a skill folder that it did not install. It leaves the other skills in the folder alone.
+The script never replaces a skill folder or link that it did not install. It leaves the other skills in the folder alone. If it skips a skill, it stops with exit code 1, because the skills link to each other.
 
 ## Develop
 
