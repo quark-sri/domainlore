@@ -21,6 +21,9 @@
     <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
     </filter>
+    <filter id="lineGlow" filterUnits="userSpaceOnUse" x="0" y="0" width="1280" height="700">
+      <feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
     <filter id="textGlow" x="-20%" y="-50%" width="140%" height="200%">
       <feGaussianBlur stdDeviation="8" in="SourceAlpha" result="a"/><feFlood flood-color="#a5f3fc" flood-opacity="0.55"/>
       <feComposite operator="in" in2="a" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
@@ -40,6 +43,9 @@
       <stop offset="0" stop-color="#ffffff" stop-opacity="0.32"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="stream" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22d3ee"/><stop offset="0.5" stop-color="#818cf8"/><stop offset="1" stop-color="#c084fc"/>
+    </linearGradient>
+    <linearGradient id="streamU" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1280" y2="0">
       <stop offset="0" stop-color="#22d3ee"/><stop offset="0.5" stop-color="#818cf8"/><stop offset="1" stop-color="#c084fc"/>
     </linearGradient>
     <linearGradient id="streamV" x1="0" y1="0" x2="0" y2="1">
@@ -85,7 +91,7 @@
 <text x="88" y="243" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#ffffff" text-anchor="start">Jira tickets</text>
 <rect x="88" y="253" width="72" height="19" rx="9.5" fill="#22d3ee" fill-opacity="0.18" stroke="#22d3ee" stroke-opacity="0.7"/>
 <text x="96" y="267" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#22d3ee" text-anchor="start">intended</text>
-<path d="M240 247 C285 247 290 404 330 404" fill="none" stroke="url(#stream)" stroke-width="2.2" stroke-opacity="0.85" stroke-linecap="round" filter="url(#softGlow)"/>
+<path d="M240 247 C285 247 290 404 330 404" fill="none" stroke="url(#streamU)" stroke-width="2.2" stroke-opacity="0.85" stroke-linecap="round" filter="url(#lineGlow)"/>
 <circle class="mover" r="4" fill="url(#sphere)"><animateMotion dur="2.8s" begin="0.0s" repeatCount="indefinite"><mpath href="#p3" xlink:href="#p3"/></animateMotion></circle>
 <g><g clip-path="url(#c4)"><rect width="1280" height="640" fill="url(#bg)"/>
   <use href="#blobs" xlink:href="#blobs" filter="url(#frost)"/><rect x="40" y="296" width="200" height="66" fill="url(#glassFill)"/><rect x="40" y="296" width="200" height="26.400000000000002" fill="url(#sheen)"/></g>
@@ -94,7 +100,7 @@
 <text x="88" y="325" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#ffffff" text-anchor="start">Confluence</text>
 <rect x="88" y="335" width="72" height="19" rx="9.5" fill="#22d3ee" fill-opacity="0.18" stroke="#22d3ee" stroke-opacity="0.7"/>
 <text x="96" y="349" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#22d3ee" text-anchor="start">intended</text>
-<path d="M240 329 C285 329 290 404 330 404" fill="none" stroke="url(#stream)" stroke-width="2.2" stroke-opacity="0.85" stroke-linecap="round" filter="url(#softGlow)"/>
+<path d="M240 329 C285 329 290 404 330 404" fill="none" stroke="url(#streamU)" stroke-width="2.2" stroke-opacity="0.85" stroke-linecap="round" filter="url(#lineGlow)"/>
 <circle class="mover" r="4" fill="url(#sphere)"><animateMotion dur="2.8s" begin="0.5s" repeatCount="indefinite"><mpath href="#p5" xlink:href="#p5"/></animateMotion></circle>
 <g><g clip-path="url(#c6)"><rect width="1280" height="640" fill="url(#bg)"/>
   <use href="#blobs" xlink:href="#blobs" filter="url(#frost)"/><rect x="40" y="378" width="200" height="66" fill="url(#glassFill)"/><rect x="40" y="378" width="200" height="26.400000000000002" fill="url(#sheen)"/></g>
@@ -103,7 +109,7 @@
 <text x="88" y="407" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#ffffff" text-anchor="start">Word and PDF</text>
 <rect x="88" y="417" width="72" height="19" rx="9.5" fill="#22d3ee" fill-opacity="0.18" stroke="#22d3ee" stroke-opacity="0.7"/>
 <text x="96" y="431" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#22d3ee" text-anchor="start">intended</text>
-<path d="M240 411 C285 411 290 404 330 404" fill="none" stroke="url(#stream)" stroke-width="2.2" stroke-opacity="0.85" stroke-linecap="round" filter="url(#softGlow)"/>
+<path d="M240 411 C285 411 290 404 330 404" fill="none" stroke="url(#streamU)" stroke-width="2.2" stroke-opacity="0.85" stroke-linecap="round" filter="url(#lineGlow)"/>
 <circle class="mover" r="4" fill="url(#sphere)"><animateMotion dur="2.8s" begin="1.0s" repeatCount="indefinite"><mpath href="#p7" xlink:href="#p7"/></animateMotion></circle>
 <g><g clip-path="url(#c8)"><rect width="1280" height="640" fill="url(#bg)"/>
   <use href="#blobs" xlink:href="#blobs" filter="url(#frost)"/><rect x="40" y="460" width="200" height="66" fill="url(#glassFill)"/><rect x="40" y="460" width="200" height="26.400000000000002" fill="url(#sheen)"/></g>
@@ -112,7 +118,7 @@
 <text x="88" y="489" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#ffffff" text-anchor="start">Running app</text>
 <rect x="88" y="499" width="58" height="19" rx="9.5" fill="#fbbf24" fill-opacity="0.18" stroke="#fbbf24" stroke-opacity="0.7"/>
 <text x="96" y="513" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#fbbf24" text-anchor="start">actual</text>
-<path d="M240 493 C285 493 290 404 330 404" fill="none" stroke="url(#stream)" stroke-width="2.2" stroke-opacity="0.85" stroke-linecap="round" filter="url(#softGlow)"/>
+<path d="M240 493 C285 493 290 404 330 404" fill="none" stroke="url(#streamU)" stroke-width="2.2" stroke-opacity="0.85" stroke-linecap="round" filter="url(#lineGlow)"/>
 <circle class="mover" r="4" fill="url(#sphere)"><animateMotion dur="2.8s" begin="1.5s" repeatCount="indefinite"><mpath href="#p9" xlink:href="#p9"/></animateMotion></circle>
 <g><g clip-path="url(#c10)"><rect width="1280" height="640" fill="url(#bg)"/>
   <use href="#blobs" xlink:href="#blobs" filter="url(#frost)"/><rect x="40" y="542" width="200" height="66" fill="url(#glassFill)"/><rect x="40" y="542" width="200" height="26.400000000000002" fill="url(#sheen)"/></g>
@@ -121,7 +127,7 @@
 <text x="88" y="571" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="17" font-weight="700" fill="#ffffff" text-anchor="start">Code</text>
 <rect x="88" y="581" width="58" height="19" rx="9.5" fill="#fbbf24" fill-opacity="0.18" stroke="#fbbf24" stroke-opacity="0.7"/>
 <text x="96" y="595" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#fbbf24" text-anchor="start">actual</text>
-<path d="M240 575 C285 575 290 404 330 404" fill="none" stroke="url(#stream)" stroke-width="2.2" stroke-opacity="0.85" stroke-linecap="round" filter="url(#softGlow)"/>
+<path d="M240 575 C285 575 290 404 330 404" fill="none" stroke="url(#streamU)" stroke-width="2.2" stroke-opacity="0.85" stroke-linecap="round" filter="url(#lineGlow)"/>
 <circle class="mover" r="4" fill="url(#sphere)"><animateMotion dur="2.8s" begin="2.0s" repeatCount="indefinite"><mpath href="#p11" xlink:href="#p11"/></animateMotion></circle>
 <polygon points="324 398.4 332 404 324 409.6" fill="#22d3ee" filter="url(#softGlow)"/>
 <g filter="url(#shadow)"><g clip-path="url(#c12)"><rect width="1280" height="640" fill="url(#bg)"/>
@@ -175,7 +181,7 @@
 <rect x="674.3399999999999" y="572" width="164" height="30" rx="15.0" fill="#34d399" fill-opacity="0.18" stroke="#34d399" stroke-opacity="0.7" stroke-width="1.2"/>
 <g transform="translate(686.3399999999999 580.0) scale(0.5833333333333334)" fill="none" stroke="#34d399" stroke-width="3.4285714285714284" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="4"/><path d="M4 22 C4 15 20 15 20 22"/></g>
 <text x="710.3399999999999" y="592.04" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="14" font-weight="700" fill="#ffffff" text-anchor="start">human-reviewed</text>
-<path d="M920 330 H990" fill="none" stroke="url(#stream)" stroke-width="3" stroke-opacity="1" stroke-linecap="round" filter="url(#softGlow)"/>
+<path d="M920 330 H990" fill="none" stroke="url(#streamU)" stroke-width="3" stroke-opacity="1" stroke-linecap="round" filter="url(#lineGlow)"/>
 <circle class="mover" r="5" fill="url(#sphere)"><animateMotion dur="1.6s" begin="0s" repeatCount="indefinite"><mpath href="#p13" xlink:href="#p13"/></animateMotion></circle>
 <polygon points="984 324.4 992 330 984 335.6" fill="#c084fc" filter="url(#softGlow)"/>
 <g filter="url(#shadow)"><g clip-path="url(#c14)"><rect width="1280" height="640" fill="url(#bg)"/>
@@ -187,7 +193,7 @@
 <text x="1012" y="338" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="15" font-weight="500" fill="#dbeafe" text-anchor="start">Claude Code · Codex</text>
 <text x="1012" y="360" font-family="-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Inter, Helvetica, Arial, sans-serif" font-size="15" font-weight="500" fill="#dbeafe" text-anchor="start">Cursor · Copilot</text>
 <text x="1012" y="398" font-family="ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="14" font-weight="600" fill="#a5f3fc" text-anchor="start">read with lore query</text>
-<path d="M1115 424 V452" fill="none" stroke="url(#streamV)" stroke-width="3" stroke-opacity="1" stroke-linecap="round" filter="url(#softGlow)"/>
+<path d="M1115 424 V452" fill="none" stroke="url(#streamV)" stroke-width="3" stroke-opacity="1" stroke-linecap="round" filter="url(#lineGlow)"/>
 <polygon points="1109.4 445 1115 453 1120.6 445" fill="#c084fc" filter="url(#softGlow)"/>
 <g filter="url(#shadow)"><g clip-path="url(#c15)"><rect width="1280" height="640" fill="url(#bg)"/>
   <use href="#blobs" xlink:href="#blobs" filter="url(#frost)"/><rect x="990" y="460" width="250" height="162" fill="url(#glassFill)"/><rect x="990" y="460" width="250" height="56" fill="url(#sheen)"/></g>
