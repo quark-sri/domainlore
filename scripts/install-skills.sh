@@ -4,8 +4,8 @@
 # Usage:
 #   scripts/install-skills.sh --agent <name>|all (--user | --project <repo>) [--copy]
 #
-# The skill folders come from the official documentation of each agent
-# (the same table as qestack's scripts/install-skills.sh, checked 2026-10-27).
+# The skill folders come from the official documentation of each agent,
+# checked 2026-10-27.
 # Works with bash 3.2 (macOS) and later.
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")/.." && pwd)"

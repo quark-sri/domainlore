@@ -76,11 +76,11 @@ def test_a_folder_that_domainlore_did_not_install_is_kept_and_the_run_fails(tmp_
 
 
 def test_other_skills_in_the_folder_are_not_touched(tmp_path):
-    other = tmp_path / ".agents" / "skills" / "test-review-panel"
+    other = tmp_path / ".agents" / "skills" / "other-skill"
     other.mkdir(parents=True)
-    (other / "SKILL.md").write_text("qestack\n", encoding="utf-8")
+    (other / "SKILL.md").write_text("another skill\n", encoding="utf-8")
     assert run(tmp_path, "--agent", "codex", "--user").returncode == 0
-    assert (other / "SKILL.md").read_text(encoding="utf-8") == "qestack\n"
+    assert (other / "SKILL.md").read_text(encoding="utf-8") == "another skill\n"
 
 
 def test_all_installs_each_shared_folder_once_and_leaves_out_claude(tmp_path):
